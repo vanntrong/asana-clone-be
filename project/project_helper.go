@@ -1,6 +1,8 @@
 package project
 
-import "github.com/vanntrong/asana-clone-be/entities"
+import (
+	"github.com/vanntrong/asana-clone-be/entities"
+)
 
 type Role string
 
@@ -9,17 +11,20 @@ const (
 	Member  Role = "member"
 )
 
-func IsUserExistInRole(project *entities.Project, userId string, role Role) bool {
-	var list []entities.User
-
-	if role == Manager {
-		list = project.Managers
-	} else {
-		list = project.Users
+func IsMember(members *[]entities.ProjectUsers, userId string) bool {
+	for _, user := range *members {
+		if user.UserId.String() == userId {
+			return true
+		}
 	}
 
-	for _, user := range list {
-		if user.ID.String() == userId {
+	return false
+}
+
+func IsManager(members *[]entities.ProjectUsers, userId string) bool {
+
+	for _, user := range *members {
+		if user.UserId.String() == userId && Role(user.Role) == Manager {
 			return true
 		}
 	}

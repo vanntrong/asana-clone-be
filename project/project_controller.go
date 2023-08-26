@@ -17,9 +17,9 @@ type ProjectController struct {
 func registerRoutes(router *gin.RouterGroup, ctrl *ProjectController) {
 	v1 := router.Group("/projects")
 	v1.POST("/", middleware.AuthMiddleware, ctrl.Create)
-	v1.GET("/:id", middleware.AuthMiddleware, ctrl.GetById)
-	v1.PATCH("/:id/members/add", middleware.AuthMiddleware, ctrl.AddMember)
-	v1.PATCH("/:id/members/remove", middleware.AuthMiddleware, ctrl.RemoveMember)
+	v1.GET("/:id", middleware.AuthMiddleware, ctrl.IsMemberOfProject, ctrl.GetById)
+	v1.PATCH("/:id/members/add", middleware.AuthMiddleware, ctrl.IsManagerOfProject, ctrl.AddMember)
+	v1.PATCH("/:id/members/remove", middleware.AuthMiddleware, ctrl.IsManagerOfProject, ctrl.RemoveMember)
 }
 
 func NewProjectController(app *gin.RouterGroup, projectService IProjectService) {
@@ -52,17 +52,11 @@ func (ctrl *ProjectController) Create(ctx *gin.Context) {
 
 func (ctrl *ProjectController) GetById(ctx *gin.Context) {
 	projectId := ctx.Param("id")
-	userId := ctx.GetHeader(configs.HeaderUserId)
 
 	project, err := ctrl.projectService.GetById(projectId)
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	if !IsUserExistInRole(project, userId, Member) {
-		ctx.AbortWithError(http.StatusNotFound, errors.New("Project not found"))
 		return
 	}
 
@@ -79,6 +73,11 @@ func (ctrl *ProjectController) AddMember(ctx *gin.Context) {
 	isValid := utils.Validation(ctx, &body)
 
 	if !isValid {
+		return
+	}
+
+	if ctrl.isAddOrRemoveSelf(body.Members, userId) {
+		ctx.AbortWithError(http.StatusBadRequest, errors.New("you can not add yourself"))
 		return
 	}
 
@@ -103,6 +102,11 @@ func (ctrl *ProjectController) RemoveMember(ctx *gin.Context) {
 		return
 	}
 
+	if ctrl.isAddOrRemoveSelf(body.Members, userId) {
+		ctx.AbortWithError(http.StatusBadRequest, errors.New("you can not remove yourself"))
+		return
+	}
+
 	err := ctrl.projectService.RemoveMember(projectId, body, userId)
 
 	if err != nil {
@@ -111,4 +115,14 @@ func (ctrl *ProjectController) RemoveMember(ctx *gin.Context) {
 	}
 
 	utils.GenerateResponse(ctx, map[string]interface{}{}, http.StatusNoContent)
+}
+
+func (ctrl *ProjectController) isAddOrRemoveSelf(list []string, requestId string) bool {
+	for _, id := range list {
+		if id == requestId {
+			return true
+		}
+	}
+
+	return false
 }

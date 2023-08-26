@@ -14,7 +14,6 @@ type User struct {
 	Password       string    `gorm:"not null" json:"-"`
 	Avatar         string    `gorm:"default:null" json:"avatar"`
 	ProjectCreated []Project `gorm:"foreignKey:CreatedById" json:"project_created"`
-	ProjectManager []Project `gorm:"many2many:project_managers;" json:"project_manager"`
 	TaskAssigned   []Task    `gorm:"foreignKey:AssigneeId" json:"task_assigned"`
 	TaskCreated    []Task    `gorm:"foreignKey:CreatedById" json:"task_created"`
 	CommentCreated []Comment `gorm:"foreignKey:AuthorId" json:"comment_created"`

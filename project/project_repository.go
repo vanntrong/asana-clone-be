@@ -9,6 +9,7 @@ import (
 type IProjectRepository interface {
 	Create(name string, authorId string, managers []string) (*entities.Project, error)
 	GetById(projectId string) (*entities.Project, error)
+	GetListMember(projectId string) (*[]entities.ProjectUsers, error)
 	AddMember(projectId string, members []string) error
 	RemoveMember(projectId string, members []string) error
 }
@@ -22,23 +23,16 @@ func NewProjectRepository(db *gorm.DB) *ProjectRepository {
 }
 
 func (repo *ProjectRepository) Create(name string, authorId string, managers []string) (*entities.Project, error) {
-	managerList := []entities.User{}
-
-	for _, managerId := range managers {
-		managerList = append(managerList, entities.User{
-			BaseEntity: entities.BaseEntity{
-				ID: uuid.MustParse(managerId),
-			},
-		})
-	}
-
 	project := &entities.Project{
 		Name:        name,
 		CreatedById: uuid.MustParse(authorId),
-		Managers:    managerList,
 	}
 
 	err := repo.db.Create(project).Error
+
+	if err != nil {
+		return nil, err
+	}
 
 	projectUsers := []entities.ProjectUsers{}
 
@@ -57,7 +51,7 @@ func (repo *ProjectRepository) Create(name string, authorId string, managers []s
 
 func (repo *ProjectRepository) GetById(projectId string) (*entities.Project, error) {
 	project := &entities.Project{}
-	result := repo.db.Where("id = ?", projectId).Preload("CreatedBy").Preload("Managers").Preload("Users").First(project)
+	result := repo.db.Where("id = ?", projectId).Preload("CreatedBy").Preload("Users").First(project)
 	err := result.Error
 
 	if result.RowsAffected == 0 {
@@ -65,6 +59,13 @@ func (repo *ProjectRepository) GetById(projectId string) (*entities.Project, err
 	}
 
 	return project, err
+}
+
+func (repo *ProjectRepository) GetListMember(projectId string) (members *[]entities.ProjectUsers, err error) {
+	members = &[]entities.ProjectUsers{}
+	err = repo.db.Where("project_id = ?", projectId).Find(members).Error
+
+	return
 }
 
 func (repo *ProjectRepository) AddMember(projectId string, members []string) error {

@@ -27,11 +27,7 @@ func (service *TaskService) Create(payload *CreateTaskValidation, authorId strin
 	projectFound, err := service.projectService.GetById(payload.ProjectId)
 
 	if err != nil || projectFound == nil {
-		return nil, errors.New("Project not found")
-	}
-
-	if !project.IsUserExistInRole(projectFound, authorId, project.Member) {
-		return nil, errors.New("You are not a member of this project")
+		return nil, errors.New("project not found")
 	}
 
 	task, err := service.taskRepository.Create(payload, authorId)
@@ -48,16 +44,6 @@ func (service *TaskService) GetById(taskId string, userId string) (*entities.Tas
 
 	if err != nil {
 		return nil, err
-	}
-
-	projectFound, err := service.projectService.GetById(task.ProjectId.String())
-
-	if err != nil {
-		return nil, err
-	}
-
-	if !project.IsUserExistInRole(projectFound, userId, project.Member) {
-		return nil, errors.New("You are not a member of this project")
 	}
 
 	return task, nil

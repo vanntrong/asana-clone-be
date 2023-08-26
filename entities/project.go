@@ -11,7 +11,6 @@ type Project struct {
 	Name        string    `gorm:"not null" json:"name"`
 	CreatedById uuid.UUID `gorm:"type:uuid;not null" json:"-"`
 	CreatedBy   User      `json:"created_by"`
-	Managers    []User    `gorm:"many2many:project_managers;" json:"managers"`
 	Users       []User    `gorm:"many2many:project_users;" json:"users"`
 	Tasks       []Task    `gorm:"foreignKey:ProjectId" json:"tasks"`
 }

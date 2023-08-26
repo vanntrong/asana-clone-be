@@ -34,5 +34,5 @@ func InitRoutes(app *gin.Engine) {
 	auth.NewAuthController(routes, authService)
 	user.NewUserController(routes, userService)
 	project.NewProjectController(routes, projectService)
-	task.NewTaskController(routes, taskService)
+	task.NewTaskController(routes, taskService, projectService)
 }

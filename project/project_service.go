@@ -10,6 +10,7 @@ import (
 type IProjectService interface {
 	Create(payload CreateProjectValidation, authorId string) (project *entities.Project, err error)
 	GetById(projectId string) (project *entities.Project, err error)
+	GetListMember(projectId string) (members *[]entities.ProjectUsers, err error)
 	AddMember(projectId string, payload AddMemberValidation, requestId string) (err error)
 	RemoveMember(projectId string, payload RemoveMemberValidation, requestId string) (err error)
 }
@@ -36,7 +37,7 @@ func (service *ProjectService) CheckListUserValid(listUser []string) bool {
 
 func (service *ProjectService) Create(payload CreateProjectValidation, authorId string) (project *entities.Project, err error) {
 	if !service.CheckListUserValid(payload.Managers) {
-		return nil, errors.New("Some managers are not found")
+		return nil, errors.New("some managers are not found")
 	}
 
 	project, err = service.projectRepository.Create(payload.Name, authorId, payload.Managers)
@@ -48,19 +49,20 @@ func (service *ProjectService) GetById(projectId string) (project *entities.Proj
 	return project, err
 }
 
+func (service *ProjectService) GetListMember(projectId string) (members *[]entities.ProjectUsers, err error) {
+	members, err = service.projectRepository.GetListMember(projectId)
+	return members, err
+}
+
 func (service *ProjectService) AddMember(projectId string, payload AddMemberValidation, requestId string) (err error) {
 	if !service.CheckListUserValid(payload.Members) {
-		return errors.New("Some members are not found")
+		return errors.New("some members are not found")
 	}
 
 	project, err := service.projectRepository.GetById(projectId)
 
 	if err != nil || project == nil {
 		return err
-	}
-
-	if !IsUserExistInRole(project, requestId, Manager) {
-		return errors.New("You are not manager of this project")
 	}
 
 	err = service.projectRepository.AddMember(projectId, payload.Members)
@@ -69,17 +71,13 @@ func (service *ProjectService) AddMember(projectId string, payload AddMemberVali
 
 func (service *ProjectService) RemoveMember(projectId string, payload RemoveMemberValidation, requestId string) (err error) {
 	if !service.CheckListUserValid(payload.Members) {
-		return errors.New("Some members are not found")
+		return errors.New("ome members are not found")
 	}
 
 	project, err := service.projectRepository.GetById(projectId)
 
 	if err != nil || project == nil {
 		return err
-	}
-
-	if !IsUserExistInRole(project, requestId, Manager) {
-		return errors.New("You are not manager of this project")
 	}
 
 	err = service.projectRepository.RemoveMember(projectId, payload.Members)
