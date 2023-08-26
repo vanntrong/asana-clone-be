@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,8 +9,6 @@ import (
 
 func Validation(ctx *gin.Context, obj interface{}) bool {
 	validate := validator.New()
-
-	fmt.Println(obj)
 
 	if err := ctx.ShouldBindJSON(obj); err != nil {
 

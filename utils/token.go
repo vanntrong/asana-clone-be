@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/vanntrong/asana-clone-be/configs"
 )
 
 type Token struct {
@@ -13,7 +14,6 @@ type Token struct {
 }
 
 func GenToken(payload map[string]string) (token *Token) {
-	var key string = "secret"
 	var access_token jwt.Token
 	var refresh_token jwt.Token
 
@@ -36,8 +36,8 @@ func GenToken(payload map[string]string) (token *Token) {
 		"exp":   time.Now().AddDate(0, 0, 30).Unix(),
 	})
 
-	access_token_str, _ := access_token.SignedString([]byte(key))
-	refresh_token_str, _ := refresh_token.SignedString([]byte(key))
+	access_token_str, _ := access_token.SignedString([]byte(configs.AppConfig.AccessTokenSecret))
+	refresh_token_str, _ := refresh_token.SignedString([]byte(configs.AppConfig.RefreshTokenSecret))
 
 	token = &Token{
 		AccessToken:  access_token_str,
@@ -52,7 +52,7 @@ func ValidateToken(token_str string) (map[string]any, error) {
 		if _, ok := t_.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method %v", t_.Header["alg"])
 		}
-		return []byte("secret"), nil
+		return []byte(configs.AppConfig.AccessTokenSecret), nil
 	})
 
 	if !token.Valid || err != nil {

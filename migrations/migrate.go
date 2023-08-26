@@ -3,17 +3,17 @@ package migrations
 import (
 	"log"
 
-	"github.com/joho/godotenv"
+	"github.com/vanntrong/asana-clone-be/configs"
 	"github.com/vanntrong/asana-clone-be/db"
 	"github.com/vanntrong/asana-clone-be/entities"
 )
 
 func init() {
-	err := godotenv.Load()
+	err := configs.LoadEnv(".", &configs.AppConfig)
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	db.ConnectToDatabase()
+	db.ConnectToDatabase(configs.AppConfig.DBUrl)
 }
 
 func AutoMigrate() {

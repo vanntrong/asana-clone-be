@@ -20,19 +20,19 @@ func InitRoutes(app *gin.Engine) {
 
 	routes := app.Group("/api/v1")
 
-	// init routes
+	// init repository
 	userRepository := user.NewUserRepository(db.DB)
-	authService := auth.NewAuthService(userRepository)
-	auth.NewAuthController(routes, authService)
-
-	userService := user.NewUserService(userRepository)
-	user.NewUserController(routes, userService)
-
 	projectRepository := project.NewProjectRepository(db.DB)
-	projectService := project.NewProjectService(projectRepository, userService)
-	project.NewProjectController(routes, projectService)
-
 	taskRepository := task.NewTaskRepository(db.DB)
+
+	// init service and controller
+	authService := auth.NewAuthService(userRepository)
+	userService := user.NewUserService(userRepository)
+	projectService := project.NewProjectService(projectRepository, userService)
 	taskService := task.NewTaskService(taskRepository, projectService)
+
+	auth.NewAuthController(routes, authService)
+	user.NewUserController(routes, userService)
+	project.NewProjectController(routes, projectService)
 	task.NewTaskController(routes, taskService)
 }
