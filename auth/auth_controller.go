@@ -33,7 +33,7 @@ func (ctrl *AuthController) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	var user, token, err = ctrl.authService.Register(body)
+	var _, token, err = ctrl.authService.Register(body)
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, err)
@@ -41,7 +41,6 @@ func (ctrl *AuthController) RegisterUser(ctx *gin.Context) {
 	}
 
 	utils.GenerateResponse(ctx, map[string]interface{}{
-		"user":  user.UserSerializer(),
 		"token": token,
 	}, http.StatusOK)
 }
@@ -54,7 +53,7 @@ func (ctrl *AuthController) LoginUser(ctx *gin.Context) {
 		return
 	}
 
-	var user, token, err = ctrl.authService.Login(body)
+	var _, token, err = ctrl.authService.Login(body)
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, errors.New("Invalid email or password"))
@@ -62,7 +61,6 @@ func (ctrl *AuthController) LoginUser(ctx *gin.Context) {
 	}
 
 	utils.GenerateResponse(ctx, map[string]interface{}{
-		"user":  user.UserSerializer(),
 		"token": token,
 	}, http.StatusOK)
 }

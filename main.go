@@ -22,5 +22,6 @@ func main() {
 
 	app := gin.Default()
 	InitRoutes(app)
-	app.Run() // listen and serve on 0.0.0.0:8080
+	address := ":" + configs.AppConfig.PORT
+	app.Run(address) // listen and serve on 0.0.0.0:8080
 }

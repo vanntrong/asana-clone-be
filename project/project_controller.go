@@ -45,7 +45,7 @@ func (ctrl *ProjectController) Create(ctx *gin.Context) {
 	}
 
 	utils.GenerateResponse(ctx, map[string]interface{}{
-		"project": project,
+		"project": project.ID.String(),
 	}, http.StatusOK)
 
 }

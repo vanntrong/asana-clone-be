@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/vanntrong/asana-clone-be/entities"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type IProjectRepository interface {
@@ -28,7 +29,7 @@ func (repo *ProjectRepository) Create(name string, authorId string, managers []s
 		CreatedById: uuid.MustParse(authorId),
 	}
 
-	err := repo.db.Create(project).Error
+	err := repo.db.Clauses(clause.Returning{}).Create(project).Preload("CreatedBy").Error
 
 	if err != nil {
 		return nil, err
@@ -45,6 +46,10 @@ func (repo *ProjectRepository) Create(name string, authorId string, managers []s
 	}
 
 	err = repo.db.Create(&projectUsers).Error
+
+	if err != nil {
+		return nil, err
+	}
 
 	return project, err
 }

@@ -2,6 +2,7 @@ package task
 
 import (
 	"errors"
+	"reflect"
 
 	"github.com/vanntrong/asana-clone-be/entities"
 	"github.com/vanntrong/asana-clone-be/project"
@@ -10,6 +11,8 @@ import (
 type ITaskService interface {
 	Create(payload *CreateTaskValidation, authorId string) (*entities.Task, error)
 	GetById(taskId string, userId string) (*entities.Task, error)
+	UpdateTask(taskId string, payload *UpdateTaskValidation, userId string) (*entities.Task, error)
+	DeleteTask(taskId string, userId string) error
 }
 
 type TaskService struct {
@@ -30,6 +33,18 @@ func (service *TaskService) Create(payload *CreateTaskValidation, authorId strin
 		return nil, errors.New("project not found")
 	}
 
+	err = service.isParentTaskValid(payload.ParentTaskId, payload.ProjectId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = service.isAssigneeValid(payload.AssigneeId, payload.ProjectId)
+
+	if err != nil {
+		return nil, err
+	}
+
 	task, err := service.taskRepository.Create(payload, authorId)
 
 	if err != nil {
@@ -40,11 +55,74 @@ func (service *TaskService) Create(payload *CreateTaskValidation, authorId strin
 }
 
 func (service *TaskService) GetById(taskId string, userId string) (*entities.Task, error) {
-	task, err := service.taskRepository.GetById(taskId)
+	return service.taskRepository.GetById(taskId)
+}
+
+func (service *TaskService) UpdateTask(taskId string, payload *UpdateTaskValidation, userId string) (*entities.Task, error) {
+	taskFound, err := service.taskRepository.GetById(taskId)
+
+	if err != nil || taskFound == nil {
+		return nil, errors.New("task not found")
+	}
+
+	err = service.isParentTaskValid(payload.ParentTaskId, taskFound.Project.ID.String())
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = service.isAssigneeValid(payload.AssigneeId, taskFound.Project.ID.String())
+
+	if err != nil {
+		return nil, err
+	}
+
+	task, err := service.taskRepository.UpdateTask(taskFound.ID.String(), payload)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return task, nil
+}
+
+func (service *TaskService) DeleteTask(taskId string, userId string) error {
+	task, err := service.taskRepository.GetById(taskId)
+
+	if err != nil || task == nil {
+		return errors.New("task not found")
+	}
+	return nil
+}
+
+func (service *TaskService) isParentTaskValid(parentTaskId string, projectId string) error {
+	if reflect.ValueOf(parentTaskId).IsZero() {
+		return nil
+	}
+
+	parentTask, err := service.taskRepository.GetById(parentTaskId)
+
+	if err != nil {
+		return errors.New("parent task not found")
+	}
+
+	if parentTask != nil || parentTask.Project.ID.String() != projectId {
+		return errors.New("parent task is not belong to this project")
+	}
+
+	return nil
+}
+
+func (service *TaskService) isAssigneeValid(assigneeId string, projectId string) error {
+	projectMembers, err := service.projectService.GetListMember(projectId)
+
+	if err != nil {
+		return err
+	}
+
+	if !project.IsMember(projectMembers, assigneeId) {
+		return errors.New("trying to assign task to someone who is not member of this project")
+	}
+
+	return nil
 }

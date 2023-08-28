@@ -8,6 +8,7 @@ type Config struct {
 	AccessTokenSecret  string `mapstructure:"ACCESS_TOKEN_SECRET"`
 	RefreshTokenSecret string `mapstructure:"REFRESH_TOKEN_SECRET"`
 	DBUrl              string `mapstructure:"DB_URL"`
+	PORT               string `mapstructure:"PORT"`
 }
 
 var AppConfig Config

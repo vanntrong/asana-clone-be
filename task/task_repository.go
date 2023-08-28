@@ -6,11 +6,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/vanntrong/asana-clone-be/entities"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ITaskRepository interface {
 	Create(payload *CreateTaskValidation, authorId string) (*entities.Task, error)
 	GetById(taskId string) (*entities.Task, error)
+	UpdateTask(taskId string, payload *UpdateTaskValidation) (*entities.Task, error)
 }
 
 type TaskRepository struct {
@@ -57,10 +59,42 @@ func (repo *TaskRepository) Create(payload *CreateTaskValidation, authorId strin
 
 func (repo *TaskRepository) GetById(taskId string) (*entities.Task, error) {
 	task := &entities.Task{}
-	result := repo.db.Where("id = ?", taskId).Preload("Assignee").Preload("CreatedBy").Preload("ParentTask").First(task)
+	result := repo.db.Where("id = ?", taskId).Preload("Assignee").Preload("Project").Preload("CreatedBy").Preload("ParentTask").First(task)
 
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	return task, nil
+}
+
+func (repo *TaskRepository) UpdateTask(taskId string, payload *UpdateTaskValidation) (*entities.Task, error) {
+	dueDate, err := time.Parse(time.RFC3339, payload.DueDate)
+
+	if err != nil {
+		return nil, err
+	}
+
+	parentTaskId := uuid.Nil
+
+	if payload.ParentTaskId != "" {
+		parentTaskId = uuid.MustParse(payload.ParentTaskId)
+	}
+
+	task := &entities.Task{
+		Title:        payload.Title,
+		Description:  payload.Description,
+		DueDate:      dueDate,
+		Status:       payload.Status,
+		Tags:         payload.Tags,
+		AssigneeId:   uuid.MustParse(payload.AssigneeId),
+		ParentTaskId: parentTaskId,
+	}
+
+	err = repo.db.Model(&task).Clauses(clause.Returning{}).Where("id = ?", taskId).Updates(task).Error
+
+	if err != nil {
+		return nil, err
 	}
 
 	return task, nil

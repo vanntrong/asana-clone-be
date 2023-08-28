@@ -9,17 +9,17 @@ import (
 
 type User struct {
 	BaseEntity
-	Name           string    `gorm:"not null" json:"name"`
-	Email          string    `gorm:"unique;not null" json:"email" `
+	Name           string    `gorm:"not null;index" json:"name"`
+	Email          string    `gorm:"unique;not null;index" json:"email" `
 	Password       string    `gorm:"not null" json:"-"`
 	Avatar         string    `gorm:"default:null" json:"avatar"`
-	ProjectCreated []Project `gorm:"foreignKey:CreatedById" json:"project_created"`
-	TaskAssigned   []Task    `gorm:"foreignKey:AssigneeId" json:"task_assigned"`
-	TaskCreated    []Task    `gorm:"foreignKey:CreatedById" json:"task_created"`
-	CommentCreated []Comment `gorm:"foreignKey:AuthorId" json:"comment_created"`
+	ProjectCreated []Project `gorm:"foreignKey:CreatedById" json:"project_created,omitempty"`
+	TaskAssigned   []Task    `gorm:"foreignKey:AssigneeId" json:"task_assigned,omitempty"`
+	TaskCreated    []Task    `gorm:"foreignKey:CreatedById" json:"task_created,omitempty"`
+	CommentCreated []Comment `gorm:"foreignKey:AuthorId" json:"comment_created,omitempty"`
 	IsActive       bool      `gorm:"default:false" json:"is_active"`
 	IsDeleted      bool      `gorm:"default:false" json:"is_deleted"`
-	DeletedAt      time.Time `gorm:"index" json:"deleted_at"`
+	DeletedAt      time.Time `gorm:"index;null" json:"deleted_at,omitempty"`
 }
 
 type UserResponse struct {
