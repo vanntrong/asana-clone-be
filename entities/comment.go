@@ -12,7 +12,7 @@ type Comment struct {
 	DeletedAt time.Time `gorm:"index" json:"deleted_at"`
 	Content   string    `gorm:"not null" json:"content"`
 	AuthorId  uuid.UUID `gorm:"type:uuid;not null" json:"-"`
-	Author    User      `json:"author"`
+	Author    *User     `json:"author"`
 	TaskId    uuid.UUID `gorm:"type:uuid;not null" json:"-"`
-	Task      Task      `json:"task"`
+	Task      *Task     `json:"task"`
 }

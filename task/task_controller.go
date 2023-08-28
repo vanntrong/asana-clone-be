@@ -18,6 +18,7 @@ type TaskController struct {
 
 func registerRoutes(router *gin.RouterGroup, ctrl *TaskController) {
 	v1 := router.Group("/tasks")
+	v1.GET("/", middleware.AuthMiddleware, ctrl.GetList)
 	v1.POST("/", middleware.AuthMiddleware, ctrl.Create)
 	v1.GET("/:id", middleware.AuthMiddleware, ctrl.GetById)
 	v1.PUT("/:id", middleware.AuthMiddleware, ctrl.UpdateTask)
@@ -115,4 +116,28 @@ func (ctrl *TaskController) DeleteTask(ctx *gin.Context) {
 	}
 
 	utils.GenerateResponse(ctx, map[string]interface{}{}, http.StatusNoContent)
+}
+
+func (ctrl *TaskController) GetList(ctx *gin.Context) {
+	var query GetListTaskValidation
+
+	isValid := utils.ValidationQuery(ctx, &query)
+
+	if !isValid {
+		return
+	}
+
+	userId := ctx.GetHeader(configs.HeaderUserId)
+
+	tasks, pagination, err := ctrl.taskService.GetListTask(userId, query)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	utils.GenerateResponse(ctx, map[string]interface{}{
+		"tasks":      tasks,
+		"pagination": pagination,
+	}, http.StatusOK)
 }

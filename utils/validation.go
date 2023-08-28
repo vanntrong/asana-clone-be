@@ -23,3 +23,20 @@ func Validation(ctx *gin.Context, obj interface{}) bool {
 
 	return true
 }
+
+func ValidationQuery(ctx *gin.Context, obj interface{}) bool {
+	validate := validator.New()
+
+	if err := ctx.ShouldBindQuery(obj); err != nil {
+
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return false
+	}
+
+	if err := validate.Struct(obj); err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return false
+	}
+
+	return true
+}

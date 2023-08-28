@@ -16,6 +16,7 @@ type UserController struct {
 
 func registerRoutes(router *gin.RouterGroup, ctrl *UserController) {
 	v1 := router.Group("/users")
+	v1.GET("/", middleware.AuthMiddleware, ctrl.GetList)
 	v1.GET("/me", middleware.AuthMiddleware, ctrl.GetMe)
 }
 
@@ -36,5 +37,27 @@ func (ctrl *UserController) GetMe(ctx *gin.Context) {
 
 	utils.GenerateResponse(ctx, gin.H{
 		"user": user.UserSerializer(),
+	}, http.StatusOK)
+}
+
+func (ctrl *UserController) GetList(ctx *gin.Context) {
+	var query GetListUserQuery
+
+	isValid := utils.ValidationQuery(ctx, &query)
+
+	if !isValid {
+		return
+	}
+
+	users, pagination, err := ctrl.userService.GetList(query)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	utils.GenerateResponse(ctx, gin.H{
+		"users":      users,
+		"pagination": pagination,
 	}, http.StatusOK)
 }

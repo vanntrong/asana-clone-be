@@ -4,8 +4,10 @@ import (
 	"errors"
 	"reflect"
 
+	"github.com/vanntrong/asana-clone-be/common"
 	"github.com/vanntrong/asana-clone-be/entities"
 	"github.com/vanntrong/asana-clone-be/project"
+	"github.com/vanntrong/asana-clone-be/utils"
 )
 
 type ITaskService interface {
@@ -13,6 +15,7 @@ type ITaskService interface {
 	GetById(taskId string, userId string) (*entities.Task, error)
 	UpdateTask(taskId string, payload *UpdateTaskValidation, userId string) (*entities.Task, error)
 	DeleteTask(taskId string, userId string) error
+	GetListTask(userId string, query GetListTaskValidation) ([]*entities.Task, *common.PaginationResponse, error)
 }
 
 type TaskService struct {
@@ -125,4 +128,27 @@ func (service *TaskService) isAssigneeValid(assigneeId string, projectId string)
 	}
 
 	return nil
+}
+
+func (service *TaskService) GetListTask(userId string, query GetListTaskValidation) (tasks []*entities.Task, pagination *common.PaginationResponse, err error) {
+	projectMembers, err := service.projectService.GetListMember(query.ProjectId)
+
+	if err != nil || len(*projectMembers) == 0 {
+		return nil, nil, errors.New("project not found")
+	}
+
+	if !project.IsMember(projectMembers, userId) {
+		return nil, nil, errors.New("you are not member of this project")
+	}
+
+	tasks, total, err := service.taskRepository.GetListTask(query)
+
+	if err != nil {
+		return
+	}
+
+	pagination = utils.GetPaginationResponse(total, &query.Pagination)
+
+	return
+
 }
