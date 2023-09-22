@@ -18,9 +18,17 @@ func InitRoutes(app *gin.Engine) {
 			"message": "pong",
 		})
 	})
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"}
-	app.Use(cors.New(config))
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:  []string{"http://localhost:3000"},
+		AllowMethods:  []string{"PUT", "PATCH", "POST", "GET", "DELETE", "OPTIONS"},
+		AllowHeaders:  []string{"Origin", "Authorization", "Content-Type"},
+		ExposeHeaders: []string{"Content-Length"},
+		// AllowCredentials: true,
+		// AllowOriginFunc: func(origin string) bool {
+		// 	return origin == "https://github.com"
+		// },
+		// MaxAge: 12 * time.Hour,
+	}))
 
 	app.Use(middleware.ErrorHandler)
 	routes := app.Group("/api/v1")
