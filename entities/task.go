@@ -8,7 +8,6 @@ import (
 
 type Task struct {
 	BaseEntity
-	IsDeleted    bool       `gorm:"default:false" json:"is_deleted"`
 	DeletedAt    time.Time  `gorm:"index" json:"deleted_at"`
 	Title        string     `gorm:"not null;index" json:"title"`
 	Description  string     `gorm:"not null" json:"description"`
@@ -19,6 +18,7 @@ type Task struct {
 	ProjectId    uuid.UUID  `gorm:"type:uuid;not null" json:"project_id"`
 	CreatedById  uuid.UUID  `gorm:"type:uuid;not null" json:"created_by_id"`
 	ParentTaskId uuid.UUID  `gorm:"type:uuid;default:null" json:"parent_task_id,omitempty"`
+	SectionId    uuid.UUID  `gorm:"type:uuid;default:null" json:"section_id,omitempty"`
 	Assignee     *User      `json:"assignee,omitempty"`
 	Project      *Project   `json:"project,omitempty"`
 	CreatedBy    *User      `json:"created_by,dive,omitempty"`

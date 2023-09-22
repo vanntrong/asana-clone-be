@@ -16,8 +16,9 @@ type ProjectController struct {
 
 func registerRoutes(router *gin.RouterGroup, ctrl *ProjectController) {
 	v1 := router.Group("/projects")
-	v1.POST("/", middleware.AuthMiddleware, ctrl.Create)
+	v1.GET("/me", middleware.AuthMiddleware, ctrl.GetMyProjects)
 	v1.GET("/:id", middleware.AuthMiddleware, ctrl.IsMemberOfProject, ctrl.GetById)
+	v1.POST("/", middleware.AuthMiddleware, ctrl.Create)
 	v1.PATCH("/:id/members/add", middleware.AuthMiddleware, ctrl.IsManagerOfProject, ctrl.AddMember)
 	v1.PATCH("/:id/members/remove", middleware.AuthMiddleware, ctrl.IsManagerOfProject, ctrl.RemoveMember)
 }
@@ -115,6 +116,21 @@ func (ctrl *ProjectController) RemoveMember(ctx *gin.Context) {
 	}
 
 	utils.GenerateResponse(ctx, map[string]interface{}{}, http.StatusNoContent)
+}
+
+func (ctrl *ProjectController) GetMyProjects(ctx *gin.Context) {
+	user_id := ctx.Request.Header.Get(configs.HeaderUserId)
+
+	projects, err := ctrl.projectService.GetMyProjects(user_id)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	utils.GenerateResponse(ctx, map[string]interface{}{
+		"projects": projects,
+	}, http.StatusOK)
 }
 
 func (ctrl *ProjectController) isAddOrRemoveSelf(list []string, requestId string) bool {

@@ -18,7 +18,6 @@ type User struct {
 	TaskCreated    *[]Task    `gorm:"foreignKey:CreatedById" json:"task_created,omitempty"`
 	CommentCreated *[]Comment `gorm:"foreignKey:AuthorId" json:"comment_created,omitempty"`
 	IsActive       bool       `gorm:"default:false" json:"is_active"`
-	IsDeleted      bool       `gorm:"default:false" json:"is_deleted"`
 	DeletedAt      time.Time  `gorm:"index;null" json:"deleted_at,omitempty"`
 }
 
@@ -41,7 +40,6 @@ func (user *User) UserSerializer() *UserResponse {
 		Email:     user.Email,
 		Avatar:    user.Avatar,
 		IsActive:  user.IsActive,
-		IsDeleted: user.IsDeleted,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		DeletedAt: user.DeletedAt,

@@ -13,6 +13,7 @@ type IProjectService interface {
 	GetListMember(projectId string) (members *[]entities.ProjectUsers, err error)
 	AddMember(projectId string, payload AddMemberValidation, requestId string) (err error)
 	RemoveMember(projectId string, payload RemoveMemberValidation, requestId string) (err error)
+	GetMyProjects(userId string) (*[]entities.Project, error)
 }
 
 type ProjectService struct {
@@ -82,4 +83,9 @@ func (service *ProjectService) RemoveMember(projectId string, payload RemoveMemb
 
 	err = service.projectRepository.RemoveMember(projectId, payload.Members)
 	return err
+}
+
+func (service *ProjectService) GetMyProjects(userId string) (*[]entities.Project, error) {
+	projects, err := service.projectRepository.GetMyProjects(userId)
+	return projects, err
 }

@@ -9,6 +9,7 @@ import (
 
 type IProjectRepository interface {
 	Create(name string, authorId string, managers []string) (*entities.Project, error)
+	GetMyProjects(userId string) (*[]entities.Project, error)
 	GetById(projectId string) (*entities.Project, error)
 	GetListMember(projectId string) (*[]entities.ProjectUsers, error)
 	AddMember(projectId string, members []string) error
@@ -95,4 +96,15 @@ func (repo *ProjectRepository) RemoveMember(projectId string, members []string) 
 	}
 
 	return err
+}
+
+func (repo *ProjectRepository) GetMyProjects(userId string) (*[]entities.Project, error) {
+	projects := &[]entities.Project{}
+	err := repo.db.Raw(`
+	select * from projects p
+	join project_users pu on p.id = pu.project_id
+	where pu.user_id = ?
+	`, userId).Scan(projects).Error
+
+	return projects, err
 }

@@ -9,6 +9,7 @@ import (
 type Project struct {
 	BaseEntity
 	Name        string    `gorm:"not null;index" json:"name"`
+	Avatar      string    `gorm:"not null;default:'https://i.imgur.com/2xW3Yzq.png'" json:"avatar"`
 	CreatedById uuid.UUID `gorm:"type:uuid;not null" json:"-"`
 	CreatedBy   *User     `json:"created_by,omitempty"`
 	Users       *[]User   `gorm:"many2many:project_users;" json:"users,omitempty"`

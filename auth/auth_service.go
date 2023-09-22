@@ -12,6 +12,7 @@ import (
 type IAuthService interface {
 	Register(payload RegisterValidation) (*entities.User, *utils.Token, error)
 	Login(payload LoginValidation) (*entities.User, *utils.Token, error)
+	CheckEmail(payload CheckEmailValidation) (*entities.User, error)
 }
 
 type AuthService struct {
@@ -74,4 +75,18 @@ func (service *AuthService) Login(payload LoginValidation) (*entities.User, *uti
 	})
 
 	return exitsUser, token, nil
+}
+
+func (service *AuthService) CheckEmail(payload CheckEmailValidation) (*entities.User, error) {
+	var exitsUser, err = service.userRepository.FindByEmail(payload.Email)
+
+	if err != nil {
+		return &entities.User{}, err
+	}
+
+	if exitsUser == nil {
+		return &entities.User{}, errors.New("Email not exists")
+	}
+
+	return exitsUser, nil
 }

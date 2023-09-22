@@ -16,6 +16,7 @@ func registerRoutes(router *gin.RouterGroup, ctrl *AuthController) {
 	v1 := router.Group("/auth")
 	v1.POST("/register", ctrl.RegisterUser)
 	v1.POST("/login", ctrl.LoginUser)
+	v1.POST("/check-email", ctrl.CheckEmail)
 }
 
 func NewAuthController(app *gin.RouterGroup, authService IAuthService) {
@@ -62,5 +63,29 @@ func (ctrl *AuthController) LoginUser(ctx *gin.Context) {
 
 	utils.GenerateResponse(ctx, map[string]interface{}{
 		"token": token,
+	}, http.StatusOK)
+}
+
+func (ctrl *AuthController) CheckEmail(ctx *gin.Context) {
+	var body CheckEmailValidation
+
+	isValid := utils.Validation(ctx, &body)
+
+	if !isValid {
+		return
+	}
+
+	var info, err = ctrl.authService.CheckEmail(body)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, errors.New("Email is not exist"))
+		return
+	}
+
+	utils.GenerateResponse(ctx, map[string]interface{}{
+		"info": map[string]interface{}{
+			"email":  info.Email,
+			"avatar": info.Avatar,
+		},
 	}, http.StatusOK)
 }
