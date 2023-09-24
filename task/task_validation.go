@@ -7,6 +7,7 @@ import (
 type CreateTaskValidation struct {
 	Title        string `form:"title" json:"title" validate:"required"`
 	Description  string `form:"description" json:"description" validate:"required"`
+	StartDate    string `form:"start_date" json:"start_date"`
 	DueDate      string `form:"due_date" json:"due_date" validate:"required"`
 	AssigneeId   string `form:"assignee_id" json:"assignee_id" validate:"required,uuid"`
 	ProjectId    string `form:"project_id" json:"project_id" validate:"required,uuid"`

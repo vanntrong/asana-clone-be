@@ -11,6 +11,7 @@ type Task struct {
 	DeletedAt    time.Time  `gorm:"index" json:"deleted_at"`
 	Title        string     `gorm:"not null;index" json:"title"`
 	Description  string     `gorm:"not null" json:"description"`
+	StartDate    time.Time  `gorm:"not null;default:autoCreateTime" json:"start_date"`
 	DueDate      time.Time  `gorm:"not null" json:"due_date"`
 	Status       string     `gorm:"not null" json:"status"`
 	Tags         string     `gorm:"not null" json:"tags"`

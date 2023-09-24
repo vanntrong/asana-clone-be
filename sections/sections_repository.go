@@ -30,9 +30,9 @@ func (repo *SectionsRepository) GetList(projectId string) (sections []*entities.
 
 func (repo *SectionsRepository) CreateSection(body CreateSectionValidation) (section *entities.Section, err error) {
 	section = &entities.Section{
-		Name:        body.Name,
-		Description: body.Description,
-		ProjectId:   uuid.MustParse(body.ProjectId),
+		Name: body.Name,
+		// Description: body.Description,
+		ProjectId: uuid.MustParse(body.ProjectId),
 	}
 
 	err = repo.db.Clauses(clause.Returning{}).Create(section).Error

@@ -5,9 +5,9 @@ type GetListSectionValidation struct {
 }
 
 type CreateSectionValidation struct {
-	ProjectId   string `form:"project_id" json:"project_id" validate:"required,uuid"`
-	Name        string `form:"name" json:"name" validate:"required"`
-	Description string `form:"description" json:"description" validate:"required"`
+	ProjectId string `form:"project_id" json:"project_id" validate:"required,uuid"`
+	Name      string `form:"name" json:"name" validate:"required"`
+	// Description string `form:"description" json:"description" validate:"required"`
 }
 
 type UpdateSectionValidation struct {
