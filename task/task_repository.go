@@ -1,8 +1,6 @@
 package task
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"github.com/vanntrong/asana-clone-be/entities"
 	"github.com/vanntrong/asana-clone-be/utils"
@@ -26,7 +24,9 @@ func NewTaskRepository(db *gorm.DB) *TaskRepository {
 }
 
 func (repo *TaskRepository) Create(payload *CreateTaskValidation, authorId string) (task *entities.Task, err error) {
-	dueDate, err := time.Parse(time.RFC3339, payload.DueDate)
+
+	dueDate, err := utils.FormatTime(payload.DueDate)
+	startDate, err := utils.FormatTime(payload.StartDate)
 
 	if err != nil {
 		return
@@ -38,15 +38,27 @@ func (repo *TaskRepository) Create(payload *CreateTaskValidation, authorId strin
 		parentTaskId = uuid.MustParse(payload.ParentTaskId)
 	}
 
+	count, err := repo.Count(CountTaskValidation{
+		ProjectId: payload.ProjectId,
+		SectionId: payload.SectionId,
+	})
+
+	if err != nil {
+		return
+	}
+
 	task = &entities.Task{
 		Title:        payload.Title,
 		Description:  payload.Description,
+		StartDate:    startDate,
 		DueDate:      dueDate,
-		Status:       payload.Status,
+		IsDone:       payload.IsDone,
 		Tags:         payload.Tags,
+		SectionId:    uuid.MustParse(payload.SectionId),
 		AssigneeId:   uuid.MustParse(payload.AssigneeId),
 		ProjectId:    uuid.MustParse(payload.ProjectId),
 		CreatedById:  uuid.MustParse(authorId),
+		Order:        count + 1,
 		ParentTaskId: parentTaskId,
 	}
 
@@ -61,7 +73,8 @@ func (repo *TaskRepository) GetById(taskId string) (task *entities.Task, err err
 }
 
 func (repo *TaskRepository) UpdateTask(taskId string, payload *UpdateTaskValidation) (task *entities.Task, err error) {
-	dueDate, err := time.Parse(time.RFC3339, payload.DueDate)
+	dueDate, err := utils.FormatTime(payload.DueDate)
+	startDate, err := utils.FormatTime(payload.StartDate)
 
 	if err != nil {
 		return
@@ -76,9 +89,11 @@ func (repo *TaskRepository) UpdateTask(taskId string, payload *UpdateTaskValidat
 	task = &entities.Task{
 		Title:        payload.Title,
 		Description:  payload.Description,
+		StartDate:    startDate,
 		DueDate:      dueDate,
-		Status:       payload.Status,
+		IsDone:       payload.IsDone,
 		Tags:         payload.Tags,
+		SectionId:    uuid.MustParse(payload.SectionId),
 		AssigneeId:   uuid.MustParse(payload.AssigneeId),
 		ParentTaskId: parentTaskId,
 	}
@@ -91,12 +106,22 @@ func (repo *TaskRepository) UpdateTask(taskId string, payload *UpdateTaskValidat
 func (repo *TaskRepository) GetListTask(query GetListTaskValidation) (tasks []*entities.Task, total int64, err error) {
 	skip := utils.GetSkipValue(query.Page, query.Limit)
 
-	err = repo.db.Model(&tasks).Preload("Assignee").Preload("Project").Preload("CreatedBy").Preload("ParentTask").
+	err = repo.db.Model(&tasks).Preload("Assignee").Preload("CreatedBy").Preload("ParentTask").
 		Where("project_id = ?", query.ProjectId).Where("is_deleted = ?", false).
+		Where("section_id = ?", query.SectionId).
+		Order("tasks.order asc").
 		Limit(query.Limit).
 		Offset(skip).
 		Count(&total).
 		Find(&tasks).Error
 
+	return
+}
+
+func (repo *TaskRepository) Count(query CountTaskValidation) (count int64, err error) {
+	err = repo.db.Model(&entities.Task{}).
+		Where("project_id = ?", query.ProjectId).
+		Where("section_id = ?", query.SectionId).
+		Count(&count).Error
 	return
 }

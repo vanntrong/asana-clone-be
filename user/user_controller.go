@@ -35,9 +35,7 @@ func (ctrl *UserController) GetMe(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, gin.H{
-		"user": user.UserSerializer(),
-	}, http.StatusOK)
+	utils.GenerateResponse(ctx, user.UserSerializer(), http.StatusOK)
 }
 
 func (ctrl *UserController) GetList(ctx *gin.Context) {
@@ -56,8 +54,5 @@ func (ctrl *UserController) GetList(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, gin.H{
-		"users":      users,
-		"pagination": pagination,
-	}, http.StatusOK)
+	utils.GenerateResponse(ctx, users, http.StatusOK, pagination)
 }

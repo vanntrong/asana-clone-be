@@ -46,9 +46,7 @@ func (ctrl *SectionsController) GetList(c *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(c, map[string]interface{}{
-		"sections": sections,
-	}, http.StatusOK)
+	utils.GenerateResponse(c, sections, http.StatusOK)
 }
 
 func (ctrl *SectionsController) CreateSection(c *gin.Context) {
@@ -69,9 +67,7 @@ func (ctrl *SectionsController) CreateSection(c *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(c, map[string]interface{}{
-		"section": section,
-	}, http.StatusOK)
+	utils.GenerateResponse(c, section, http.StatusOK)
 }
 
 func (ctrl *SectionsController) UpdateSection(c *gin.Context) {
@@ -94,9 +90,7 @@ func (ctrl *SectionsController) UpdateSection(c *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(c, map[string]interface{}{
-		"section": section,
-	}, http.StatusOK)
+	utils.GenerateResponse(c, section, http.StatusOK)
 }
 
 func (ctrl *SectionsController) GetById(c *gin.Context) {
@@ -111,7 +105,5 @@ func (ctrl *SectionsController) GetById(c *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(c, map[string]interface{}{
-		"section": section,
-	}, http.StatusOK)
+	utils.GenerateResponse(c, section, http.StatusOK)
 }

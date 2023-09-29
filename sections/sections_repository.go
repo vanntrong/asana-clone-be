@@ -23,7 +23,7 @@ func NewSectionsRepository(db *gorm.DB) *SectionsRepository {
 }
 
 func (repo *SectionsRepository) GetList(projectId string) (sections []*entities.Section, err error) {
-	err = repo.db.Where("project_id = ?", projectId).Preload("Tasks").Find(&sections).Error
+	err = repo.db.Where("project_id = ?", projectId).Find(&sections).Error
 
 	return
 }

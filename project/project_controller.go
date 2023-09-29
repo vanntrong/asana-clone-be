@@ -45,9 +45,7 @@ func (ctrl *ProjectController) Create(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, map[string]interface{}{
-		"project": project.ID.String(),
-	}, http.StatusOK)
+	utils.GenerateResponse(ctx, project.ID.String(), http.StatusOK)
 
 }
 
@@ -61,9 +59,7 @@ func (ctrl *ProjectController) GetById(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, map[string]interface{}{
-		"project": project,
-	}, http.StatusOK)
+	utils.GenerateResponse(ctx, project, http.StatusOK)
 }
 
 func (ctrl *ProjectController) AddMember(ctx *gin.Context) {
@@ -89,7 +85,7 @@ func (ctrl *ProjectController) AddMember(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, map[string]interface{}{}, http.StatusNoContent)
+	utils.GenerateResponse(ctx, nil, http.StatusNoContent)
 }
 
 func (ctrl *ProjectController) RemoveMember(ctx *gin.Context) {
@@ -115,7 +111,7 @@ func (ctrl *ProjectController) RemoveMember(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, map[string]interface{}{}, http.StatusNoContent)
+	utils.GenerateResponse(ctx, nil, http.StatusNoContent)
 }
 
 func (ctrl *ProjectController) GetMyProjects(ctx *gin.Context) {
@@ -128,9 +124,7 @@ func (ctrl *ProjectController) GetMyProjects(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, map[string]interface{}{
-		"projects": projects,
-	}, http.StatusOK)
+	utils.GenerateResponse(ctx, projects, http.StatusOK)
 }
 
 func (ctrl *ProjectController) isAddOrRemoveSelf(list []string, requestId string) bool {

@@ -41,9 +41,7 @@ func (ctrl *AuthController) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, map[string]interface{}{
-		"token": token,
-	}, http.StatusOK)
+	utils.GenerateResponse(ctx, token, http.StatusOK)
 }
 
 func (ctrl *AuthController) LoginUser(ctx *gin.Context) {
@@ -61,9 +59,7 @@ func (ctrl *AuthController) LoginUser(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, map[string]interface{}{
-		"token": token,
-	}, http.StatusOK)
+	utils.GenerateResponse(ctx, token, http.StatusOK)
 }
 
 func (ctrl *AuthController) CheckEmail(ctx *gin.Context) {
@@ -83,9 +79,7 @@ func (ctrl *AuthController) CheckEmail(ctx *gin.Context) {
 	}
 
 	utils.GenerateResponse(ctx, map[string]interface{}{
-		"info": map[string]interface{}{
-			"email":  info.Email,
-			"avatar": info.Avatar,
-		},
+		"email":  info.Email,
+		"avatar": info.Avatar,
 	}, http.StatusOK)
 }

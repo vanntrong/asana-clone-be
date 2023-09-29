@@ -60,9 +60,7 @@ func (ctrl *TaskController) Create(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, map[string]interface{}{
-		"task": task.ID.String(),
-	}, http.StatusOK)
+	utils.GenerateResponse(ctx, task, http.StatusOK)
 }
 
 func (ctrl *TaskController) GetById(ctx *gin.Context) {
@@ -75,9 +73,7 @@ func (ctrl *TaskController) GetById(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, map[string]interface{}{
-		"task": task,
-	}, http.StatusOK)
+	utils.GenerateResponse(ctx, task, http.StatusOK)
 }
 
 func (ctrl *TaskController) UpdateTask(ctx *gin.Context) {
@@ -99,9 +95,7 @@ func (ctrl *TaskController) UpdateTask(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, map[string]interface{}{
-		"task": task.ID.String(),
-	}, http.StatusOK)
+	utils.GenerateResponse(ctx, task, http.StatusOK)
 }
 
 func (ctrl *TaskController) DeleteTask(ctx *gin.Context) {
@@ -136,8 +130,5 @@ func (ctrl *TaskController) GetList(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, map[string]interface{}{
-		"tasks":      tasks,
-		"pagination": pagination,
-	}, http.StatusOK)
+	utils.GenerateResponse(ctx, tasks, http.StatusOK, pagination)
 }
