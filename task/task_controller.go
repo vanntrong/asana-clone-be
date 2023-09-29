@@ -22,6 +22,7 @@ func registerRoutes(router *gin.RouterGroup, ctrl *TaskController) {
 	v1.POST("/", middleware.AuthMiddleware, ctrl.Create)
 	v1.GET("/:id", middleware.AuthMiddleware, ctrl.GetById)
 	v1.PUT("/:id", middleware.AuthMiddleware, ctrl.UpdateTask)
+	// v1.PATCH("/:id", middleware.AuthMiddleware, ctrl.PatchUpdateTask)
 	v1.DELETE("/:id", middleware.AuthMiddleware, ctrl.DeleteTask)
 }
 
@@ -96,6 +97,28 @@ func (ctrl *TaskController) UpdateTask(ctx *gin.Context) {
 	}
 
 	utils.GenerateResponse(ctx, task, http.StatusOK)
+}
+
+func (ctrl *TaskController) PatchUpdateTask(ctx *gin.Context) {
+	taskId := ctx.Param("id")
+	userId := ctx.GetHeader(configs.HeaderUserId)
+
+	var body PatchUpdateTaskValidation
+
+	isValid := utils.Validation(ctx, &body)
+
+	if !isValid {
+		return
+	}
+
+	err := ctrl.taskService.PatchUpdateTask(taskId, &body, userId)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	utils.GenerateResponse(ctx, nil, http.StatusNoContent)
 }
 
 func (ctrl *TaskController) DeleteTask(ctx *gin.Context) {
