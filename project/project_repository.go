@@ -14,6 +14,7 @@ type IProjectRepository interface {
 	GetListMember(projectId string) (*[]entities.ProjectUsers, error)
 	AddMember(projectId string, members []string) error
 	RemoveMember(projectId string, members []string) error
+	FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, err error)
 }
 
 type ProjectRepository struct {
@@ -107,4 +108,22 @@ func (repo *ProjectRepository) GetMyProjects(userId string) (*[]entities.Project
 	`, userId).Scan(projects).Error
 
 	return projects, err
+}
+
+func (repo *ProjectRepository) FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, err error) {
+	members = &[]entities.User{}
+
+	stringQuery := `
+	select u.id,u."name",u.email,u.avatar from users u 
+	join project_users pu ON pu.user_id = u.id 
+	where pu.project_id = ? and u.is_active = true and u.is_deleted = false
+	`
+
+	if payload.Keyword != "" {
+		stringQuery += " and (u.name ilike '%" + payload.Keyword + "%' or u.email ilike '%" + payload.Keyword + "%')"
+	}
+
+	err = repo.db.Raw(stringQuery, projectId).Scan(members).Error
+
+	return
 }

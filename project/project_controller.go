@@ -19,6 +19,7 @@ func registerRoutes(router *gin.RouterGroup, ctrl *ProjectController) {
 	v1.GET("/me", middleware.AuthMiddleware, ctrl.GetMyProjects)
 	v1.GET("/:id", middleware.AuthMiddleware, ctrl.IsMemberOfProject, ctrl.GetById)
 	v1.POST("/", middleware.AuthMiddleware, ctrl.Create)
+	v1.GET("/:id/members", middleware.AuthMiddleware, ctrl.IsMemberOfProject, ctrl.FindMembers)
 	v1.PATCH("/:id/members/add", middleware.AuthMiddleware, ctrl.IsManagerOfProject, ctrl.AddMember)
 	v1.PATCH("/:id/members/remove", middleware.AuthMiddleware, ctrl.IsManagerOfProject, ctrl.RemoveMember)
 }
@@ -125,6 +126,26 @@ func (ctrl *ProjectController) GetMyProjects(ctx *gin.Context) {
 	}
 
 	utils.GenerateResponse(ctx, projects, http.StatusOK)
+}
+
+func (ctrl *ProjectController) FindMembers(ctx *gin.Context) {
+	var query FindMembersValidation
+	projectId := ctx.Param("id")
+
+	isValid := utils.ValidationQuery(ctx, &query)
+
+	if !isValid {
+		return
+	}
+
+	members, err := ctrl.projectService.FindMembers(projectId, query)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	utils.GenerateResponse(ctx, members, http.StatusOK)
 }
 
 func (ctrl *ProjectController) isAddOrRemoveSelf(list []string, requestId string) bool {
