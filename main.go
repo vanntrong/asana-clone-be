@@ -12,7 +12,7 @@ import (
 func init() {
 	err := configs.LoadEnv(".", &configs.AppConfig)
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal(err)
 	}
 	db.ConnectToDatabase(configs.AppConfig.DBUrl)
 	migrations.AutoMigrate()
