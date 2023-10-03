@@ -42,7 +42,11 @@ func (service *ProjectService) Create(payload CreateProjectValidation, authorId 
 		return nil, errors.New("some managers are not found")
 	}
 
-	project, err = service.projectRepository.Create(payload.Name, authorId, payload.Managers)
+	if !service.CheckListUserValid(payload.Members) {
+		return nil, errors.New("some members are not found")
+	}
+
+	project, err = service.projectRepository.Create(payload.Name, authorId, payload.Managers, payload.Members)
 	return project, err
 }
 

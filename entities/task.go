@@ -8,7 +8,6 @@ import (
 
 type Task struct {
 	BaseEntity
-	DeletedAt    time.Time     `gorm:"index" json:"deleted_at"`
 	Title        string        `gorm:"not null;index" json:"title"`
 	Description  string        `gorm:"" json:"description"`
 	StartDate    time.Time     `gorm:"not null;default:current_timestamp" json:"start_date"`

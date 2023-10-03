@@ -18,19 +18,18 @@ type User struct {
 	TaskCreated    *[]Task    `gorm:"foreignKey:CreatedById" json:"task_created,omitempty"`
 	CommentCreated *[]Comment `gorm:"foreignKey:AuthorId" json:"comment_created,omitempty"`
 	IsActive       bool       `gorm:"default:false" json:"is_active"`
-	DeletedAt      time.Time  `gorm:"index;null" json:"deleted_at,omitempty"`
 }
 
 type UserResponse struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email" `
-	Avatar    string    `json:"avatar"`
-	IsActive  bool      `json:"is_active"`
-	IsDeleted bool      `json:"is_deleted"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	DeletedAt time.Time `json:"deleted_at"`
+	ID        uuid.UUID  `json:"id"`
+	Name      string     `json:"name"`
+	Email     string     `json:"email" `
+	Avatar    string     `json:"avatar"`
+	IsActive  bool       `json:"is_active"`
+	IsDeleted bool       `json:"is_deleted"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 func (user *User) UserSerializer() *UserResponse {

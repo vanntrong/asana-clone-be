@@ -21,7 +21,7 @@ func InitRoutes(app *gin.Engine) {
 	config := cors.DefaultConfig()
 	// config.AllowOrigins = []string{"http://localhost:3000"}
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization", "X-CSRF-Token", "Access-Control-Allow-Origin"}
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"}
 	config.ExposeHeaders = []string{"Content-Length"}
 	config.AllowOriginFunc = func(origin string) bool {
 		return origin == "http://localhost:3000"

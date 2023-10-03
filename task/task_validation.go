@@ -51,3 +51,9 @@ type CountTaskValidation struct {
 	ProjectId string `form:"project_id" json:"project_id" validate:"required,uuid"`
 	SectionId string `form:"section_id" json:"section_id" validate:"required,uuid"`
 }
+
+type UpdateOrderTasksValidation struct {
+	ProjectId string   `form:"project_id" json:"project_id" validate:"required,uuid"`
+	SectionId string   `form:"section_id" json:"section_id" validate:"required,uuid"`
+	Tasks     []string `form:"tasks" json:"tasks" validate:"required,dive,uuid"`
+}

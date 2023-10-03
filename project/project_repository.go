@@ -8,7 +8,7 @@ import (
 )
 
 type IProjectRepository interface {
-	Create(name string, authorId string, managers []string) (*entities.Project, error)
+	Create(name string, authorId string, managers []string, members []string) (*entities.Project, error)
 	GetMyProjects(userId string) (*[]entities.Project, error)
 	GetById(projectId string) (*entities.Project, error)
 	GetListMember(projectId string) (*[]entities.ProjectUsers, error)
@@ -25,7 +25,7 @@ func NewProjectRepository(db *gorm.DB) *ProjectRepository {
 	return &ProjectRepository{db}
 }
 
-func (repo *ProjectRepository) Create(name string, authorId string, managers []string) (*entities.Project, error) {
+func (repo *ProjectRepository) Create(name string, authorId string, managers []string, members []string) (*entities.Project, error) {
 	project := &entities.Project{
 		Name:        name,
 		CreatedById: uuid.MustParse(authorId),
@@ -44,6 +44,14 @@ func (repo *ProjectRepository) Create(name string, authorId string, managers []s
 			UserId:    uuid.MustParse(managerId),
 			ProjectId: project.ID,
 			Role:      "manager",
+		})
+	}
+
+	for _, memberId := range members {
+		projectUsers = append(projectUsers, entities.ProjectUsers{
+			UserId:    uuid.MustParse(memberId),
+			ProjectId: project.ID,
+			Role:      "member",
 		})
 	}
 

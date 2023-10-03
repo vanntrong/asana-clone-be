@@ -14,6 +14,7 @@ type ITaskRepository interface {
 	UpdateTask(taskId string, payload *UpdateTaskValidation) (*entities.Task, error)
 	PatchUpdateTask(taskId string, payload *PatchUpdateTaskValidation) error
 	GetListTask(query GetListTaskValidation) ([]*entities.Task, int64, error)
+	UpdateOrderTasks(projectId string, sectionId string, tasks []string) error
 }
 
 type TaskRepository struct {
@@ -144,4 +145,21 @@ func (repo *TaskRepository) Count(query CountTaskValidation) (count int64, err e
 		Where("section_id = ?", query.SectionId).
 		Count(&count).Error
 	return
+}
+
+func (repo *TaskRepository) UpdateOrderTasks(projectId string, sectionId string, tasks []string) error {
+	for index, taskId := range tasks {
+		err := repo.db.Model(&entities.Task{}).Where("id = ?", taskId).
+			Where("project_id = ?", projectId).
+			Where("is_deleted = ?", false).
+			Update("order", index+1).
+			Update("section_id", sectionId).
+			Error
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

@@ -18,6 +18,7 @@ type ITaskService interface {
 	PatchUpdateTask(taskId string, payload *PatchUpdateTaskValidation, userId string) error
 	DeleteTask(taskId string, userId string) error
 	GetListTask(userId string, query GetListTaskValidation) ([]*entities.Task, *common.PaginationResponse, error)
+	UpdateOrderTasks(projectId string, sectionId string, userId string, tasks []string) error
 }
 
 type TaskService struct {
@@ -188,5 +189,19 @@ func (service *TaskService) GetListTask(userId string, query GetListTaskValidati
 	pagination = utils.GetPaginationResponse(total, &query.Pagination)
 
 	return
+}
+
+func (service *TaskService) UpdateOrderTasks(projectId string, sectionId string, userId string, tasks []string) error {
+	projectMembers, err := service.projectService.GetListMember(projectId)
+
+	if err != nil || len(*projectMembers) == 0 {
+		return errors.New("project not found")
+	}
+
+	if !project.IsMember(projectMembers, userId) {
+		return errors.New("you are not member of this project")
+	}
+
+	return service.taskRepository.UpdateOrderTasks(projectId, sectionId, tasks)
 
 }

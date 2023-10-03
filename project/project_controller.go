@@ -46,7 +46,7 @@ func (ctrl *ProjectController) Create(ctx *gin.Context) {
 		return
 	}
 
-	utils.GenerateResponse(ctx, project.ID.String(), http.StatusOK)
+	utils.GenerateResponse(ctx, project, http.StatusOK)
 
 }
 

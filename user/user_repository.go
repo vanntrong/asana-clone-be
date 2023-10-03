@@ -63,8 +63,8 @@ func (repo *UserRepository) GetList(query GetListUserQuery) (users []*entities.U
 
 	err = repo.db.Model(&users).
 		Where(
-			repo.db.Model(&entities.User{}).Where("name LIKE ?", "%"+query.Keyword+"%").
-				Or("email LIKE ?", "%"+query.Keyword+"%"),
+			repo.db.Model(&entities.User{}).Where("name ILIKE ?", "%"+query.Keyword+"%").
+				Or("email ILIKE ?", "%"+query.Keyword+"%"),
 		).
 		Where("is_deleted = ?", false).
 		Limit(query.Limit).

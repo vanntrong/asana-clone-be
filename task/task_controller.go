@@ -20,9 +20,9 @@ func registerRoutes(router *gin.RouterGroup, ctrl *TaskController) {
 	v1 := router.Group("/tasks")
 	v1.GET("/", middleware.AuthMiddleware, ctrl.GetList)
 	v1.POST("/", middleware.AuthMiddleware, ctrl.Create)
+	v1.PATCH("/orders", middleware.AuthMiddleware, ctrl.UpdateOrderTasks)
 	v1.GET("/:id", middleware.AuthMiddleware, ctrl.GetById)
 	v1.PUT("/:id", middleware.AuthMiddleware, ctrl.UpdateTask)
-	// v1.PATCH("/:id", middleware.AuthMiddleware, ctrl.PatchUpdateTask)
 	v1.DELETE("/:id", middleware.AuthMiddleware, ctrl.DeleteTask)
 }
 
@@ -154,4 +154,25 @@ func (ctrl *TaskController) GetList(ctx *gin.Context) {
 	}
 
 	utils.GenerateResponse(ctx, tasks, http.StatusOK, pagination)
+}
+
+func (ctrl *TaskController) UpdateOrderTasks(ctx *gin.Context) {
+	var body UpdateOrderTasksValidation
+
+	isValid := utils.Validation(ctx, &body)
+
+	if !isValid {
+		return
+	}
+
+	userId := ctx.GetHeader(configs.HeaderUserId)
+
+	err := ctrl.taskService.UpdateOrderTasks(body.ProjectId, body.SectionId, userId, body.Tasks)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	utils.GenerateResponse(ctx, map[string]interface{}{}, http.StatusNoContent)
 }
