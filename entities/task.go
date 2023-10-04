@@ -20,6 +20,8 @@ type Task struct {
 	CreatedById  uuid.UUID     `gorm:"type:uuid;not null" json:"created_by_id"`
 	ParentTaskId uuid.NullUUID `gorm:"type:uuid;default:null" json:"parent_task_id,dive,omitempty"`
 	SectionId    uuid.UUID     `gorm:"type:uuid;default:null" json:"section_id,omitempty"`
+	IsLiked      *bool         `gorm:"type:bool" json:"is_liked"`
+	LikeCount    *int          `gorm:"type:int" json:"like_count"`
 	Assignee     *User         `json:"assignee,omitempty"`
 	Project      *Project      `json:"project,omitempty"`
 	CreatedBy    *User         `json:"created_by,dive,omitempty"`

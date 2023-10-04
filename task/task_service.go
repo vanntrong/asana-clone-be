@@ -2,6 +2,7 @@ package task
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 
 	"github.com/google/uuid"
@@ -181,7 +182,7 @@ func (service *TaskService) GetListTask(userId string, query GetListTaskValidati
 		return nil, nil, errors.New("you are not member of this project")
 	}
 
-	tasks, total, err := service.taskRepository.GetListTask(query)
+	tasks, total, err := service.taskRepository.GetListTask(query, userId)
 
 	if err != nil {
 		return
@@ -227,11 +228,9 @@ func (service *TaskService) LikeTask(taskId string, projectId string, userId str
 		return errors.New("you are not member of this project")
 	}
 
-	isExist, err := service.taskRepository.CheckLikeExist(taskId, userId)
+	isExist, _ := service.taskRepository.CheckLikeExist(taskId, userId)
 
-	if err != nil {
-		return
-	}
+	fmt.Print(isExist)
 
 	if isExist {
 		err = service.taskRepository.UnLikeTask(taskId, userId)

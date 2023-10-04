@@ -30,6 +30,7 @@ func MigrationTable() {
 	db.DB.AutoMigrate(&entities.User{})
 	db.DB.AutoMigrate(&entities.Project{})
 	db.DB.AutoMigrate(&entities.ProjectUsers{})
+	db.DB.AutoMigrate(&entities.TaskLikes{})
 	db.DB.AutoMigrate(&entities.Task{})
 	db.DB.AutoMigrate(&entities.Comment{})
 	db.DB.AutoMigrate(&entities.Section{})

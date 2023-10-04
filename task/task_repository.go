@@ -1,6 +1,8 @@
 package task
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/vanntrong/asana-clone-be/entities"
 	"github.com/vanntrong/asana-clone-be/utils"
@@ -13,7 +15,7 @@ type ITaskRepository interface {
 	GetById(taskId string) (*entities.Task, error)
 	UpdateTask(taskId string, payload *UpdateTaskValidation) (*entities.Task, error)
 	PatchUpdateTask(taskId string, payload *PatchUpdateTaskValidation) error
-	GetListTask(query GetListTaskValidation) ([]*entities.Task, int64, error)
+	GetListTask(query GetListTaskValidation, userId string) ([]*entities.Task, int64, error)
 	UpdateOrderTasks(projectId string, sectionId string, tasks []string) error
 	CheckLikeExist(taskId string, userId string) (isExist bool, err error)
 	LikeTask(taskId string, userId string) (err error)
@@ -127,10 +129,13 @@ func (repo *TaskRepository) PatchUpdateTask(taskId string, payload *PatchUpdateT
 	return
 }
 
-func (repo *TaskRepository) GetListTask(query GetListTaskValidation) (tasks []*entities.Task, total int64, err error) {
+func (repo *TaskRepository) GetListTask(query GetListTaskValidation, userId string) (tasks []*entities.Task, total int64, err error) {
 	skip := utils.GetSkipValue(query.Page, query.Limit)
 
 	err = repo.db.Model(&tasks).Preload("Assignee").Preload("CreatedBy").Preload("ParentTask").
+		Select("tasks.*, case when task_likes.task_id is not null then true else false end as is_liked, COALESCE(like_counts.like_count, 0) AS like_count").
+		Joins("left join task_likes on tasks.id = task_likes.task_id and task_likes.user_id = ?", userId).
+		Joins("left join (select task_id, count(*) AS like_count from task_likes group by task_id) as like_counts on tasks.id = like_counts.task_id").
 		Where("project_id = ?", query.ProjectId).Where("is_deleted = ?", false).
 		Where("section_id = ?", query.SectionId).
 		Order("tasks.order asc").
@@ -172,7 +177,7 @@ func (repo *TaskRepository) CheckLikeExist(taskId string, userId string) (isExis
 
 	err = repo.db.Where("task_id = ?", taskId).Where("user_id = ?", userId).First(like).Error
 
-	if err != nil {
+	if err != nil || like == nil {
 		return false, err
 	}
 
@@ -184,6 +189,8 @@ func (repo *TaskRepository) LikeTask(taskId string, userId string) (err error) {
 		TaskId: uuid.MustParse(taskId),
 		UserId: uuid.MustParse(userId),
 	}
+
+	fmt.Print(like)
 
 	err = repo.db.Create(like).Error
 
