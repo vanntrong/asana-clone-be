@@ -1,0 +1,24 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag asana-be:$(date +%s)
+
+    - name: Stop old docker image
+      run: docker stop asana-be || true && docker rm asana-be || true
+
+    - name: Run new image
+      run: docker run --name asana-be -d -p 8081:8081 --network asana-clone_db_network asana-be
