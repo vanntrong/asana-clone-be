@@ -19,6 +19,7 @@ type ITaskService interface {
 	DeleteTask(taskId string, userId string) error
 	GetListTask(userId string, query GetListTaskValidation) ([]*entities.Task, *common.PaginationResponse, error)
 	UpdateOrderTasks(projectId string, sectionId string, userId string, tasks []string) error
+	LikeTask(taskId string, projectId string, userId string) (err error)
 }
 
 type TaskService struct {
@@ -203,5 +204,40 @@ func (service *TaskService) UpdateOrderTasks(projectId string, sectionId string,
 	}
 
 	return service.taskRepository.UpdateOrderTasks(projectId, sectionId, tasks)
+}
 
+func (service *TaskService) LikeTask(taskId string, projectId string, userId string) (err error) {
+	task, err := service.taskRepository.GetById(taskId)
+
+	if err != nil || task == nil {
+		return errors.New("task not found")
+	}
+
+	if task.Project.ID.String() != projectId {
+		return errors.New("task not found")
+	}
+
+	projectMembers, err := service.projectService.GetListMember(projectId)
+
+	if err != nil || len(*projectMembers) == 0 {
+		return errors.New("project not found")
+	}
+
+	if !project.IsMember(projectMembers, userId) {
+		return errors.New("you are not member of this project")
+	}
+
+	isExist, err := service.taskRepository.CheckLikeExist(taskId, userId)
+
+	if err != nil {
+		return
+	}
+
+	if isExist {
+		err = service.taskRepository.UnLikeTask(taskId, userId)
+	} else {
+		err = service.taskRepository.LikeTask(taskId, userId)
+	}
+
+	return
 }

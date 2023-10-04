@@ -20,9 +20,10 @@ func registerRoutes(router *gin.RouterGroup, ctrl *TaskController) {
 	v1 := router.Group("/tasks")
 	v1.GET("/", middleware.AuthMiddleware, ctrl.GetList)
 	v1.POST("/", middleware.AuthMiddleware, ctrl.Create)
-	v1.PATCH("/orders", middleware.AuthMiddleware, ctrl.UpdateOrderTasks)
 	v1.GET("/:id", middleware.AuthMiddleware, ctrl.GetById)
 	v1.PUT("/:id", middleware.AuthMiddleware, ctrl.UpdateTask)
+	v1.PATCH("/orders", middleware.AuthMiddleware, ctrl.UpdateOrderTasks)
+	v1.PATCH("/:id/like", middleware.AuthMiddleware, ctrl.LikeTask)
 	v1.DELETE("/:id", middleware.AuthMiddleware, ctrl.DeleteTask)
 }
 
@@ -168,6 +169,28 @@ func (ctrl *TaskController) UpdateOrderTasks(ctx *gin.Context) {
 	userId := ctx.GetHeader(configs.HeaderUserId)
 
 	err := ctrl.taskService.UpdateOrderTasks(body.ProjectId, body.SectionId, userId, body.Tasks)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	utils.GenerateResponse(ctx, map[string]interface{}{}, http.StatusNoContent)
+}
+
+func (ctrl *TaskController) LikeTask(ctx *gin.Context) {
+	taskId := ctx.Param("id")
+	userId := ctx.GetHeader(configs.HeaderUserId)
+
+	var body LikeTaskValidation
+
+	isValid := utils.Validation(ctx, &body)
+
+	if !isValid {
+		return
+	}
+
+	err := ctrl.taskService.LikeTask(taskId, body.ProjectId, userId)
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, err)

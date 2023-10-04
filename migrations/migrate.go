@@ -23,6 +23,7 @@ func AutoMigrate() {
 
 func SetupJoinTable() {
 	db.DB.SetupJoinTable(&entities.Project{}, "Users", &entities.ProjectUsers{})
+	db.DB.SetupJoinTable(&entities.Task{}, "Likes", &entities.TaskLikes{})
 }
 
 func MigrationTable() {

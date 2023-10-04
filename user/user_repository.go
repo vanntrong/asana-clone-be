@@ -61,12 +61,18 @@ func (repo *UserRepository) FindById(id string) (user *entities.User, err error)
 func (repo *UserRepository) GetList(query GetListUserQuery) (users []*entities.User, total int64, err error) {
 	skip := utils.GetSkipValue(query.Page, query.Limit)
 
-	err = repo.db.Model(&users).
+	queryBuilder := repo.db.Model(&users).
 		Where(
 			repo.db.Model(&entities.User{}).Where("name ILIKE ?", "%"+query.Keyword+"%").
 				Or("email ILIKE ?", "%"+query.Keyword+"%"),
 		).
-		Where("is_deleted = ?", false).
+		Where("is_deleted = ?", false)
+
+	if query.ExcludeInProject != "" {
+		queryBuilder = queryBuilder.Where("id not in (select pu.user_id from project_users pu where pu.project_id = ?)", query.ExcludeInProject)
+	}
+
+	err = queryBuilder.
 		Limit(query.Limit).
 		Offset(skip).
 		Find(&users).

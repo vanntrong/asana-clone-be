@@ -15,6 +15,9 @@ type ITaskRepository interface {
 	PatchUpdateTask(taskId string, payload *PatchUpdateTaskValidation) error
 	GetListTask(query GetListTaskValidation) ([]*entities.Task, int64, error)
 	UpdateOrderTasks(projectId string, sectionId string, tasks []string) error
+	CheckLikeExist(taskId string, userId string) (isExist bool, err error)
+	LikeTask(taskId string, userId string) (err error)
+	UnLikeTask(taskId string, userId string) (err error)
 }
 
 type TaskRepository struct {
@@ -162,4 +165,35 @@ func (repo *TaskRepository) UpdateOrderTasks(projectId string, sectionId string,
 	}
 
 	return nil
+}
+
+func (repo *TaskRepository) CheckLikeExist(taskId string, userId string) (isExist bool, err error) {
+	like := &entities.TaskLikes{}
+
+	err = repo.db.Where("task_id = ?", taskId).Where("user_id = ?", userId).First(like).Error
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (repo *TaskRepository) LikeTask(taskId string, userId string) (err error) {
+	like := &entities.TaskLikes{
+		TaskId: uuid.MustParse(taskId),
+		UserId: uuid.MustParse(userId),
+	}
+
+	err = repo.db.Create(like).Error
+
+	return
+}
+
+func (repo *TaskRepository) UnLikeTask(taskId string, userId string) (err error) {
+	like := &entities.TaskLikes{}
+
+	err = repo.db.Where("task_id = ?", taskId).Where("user_id = ?", userId).Delete(like).Error
+
+	return
 }

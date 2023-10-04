@@ -26,4 +26,11 @@ type Task struct {
 	ParentTask   *Task         `json:"parent_task,omitempty"`
 	Section      *Section      `json:"section,omitempty"`
 	Comments     *[]Comment    `gorm:"foreignKey:TaskId" json:"comments,omitempty"`
+	Likes        *[]User       `gorm:"many2many:task_likes;" json:"users,omitempty"`
+}
+
+type TaskLikes struct {
+	TaskId    uuid.UUID `gorm:"type:uuid;not null" json:"task_id"`
+	UserId    uuid.UUID `gorm:"type:uuid;not null" json:"user_id"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 }
