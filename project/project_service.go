@@ -15,6 +15,7 @@ type IProjectService interface {
 	RemoveMember(projectId string, payload RemoveMemberValidation, requestId string) (err error)
 	GetMyProjects(userId string) (*[]entities.Project, error)
 	FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, err error)
+	FindMember(projectId string, userId string) (*entities.ProjectUsers, error)
 }
 
 type ProjectService struct {
@@ -98,4 +99,9 @@ func (service *ProjectService) GetMyProjects(userId string) (*[]entities.Project
 func (service *ProjectService) FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, err error) {
 	members, err = service.projectRepository.FindMembers(projectId, payload)
 	return members, err
+}
+
+func (service *ProjectService) FindMember(projectId string, userId string) (*entities.ProjectUsers, error) {
+	member, err := service.projectRepository.FindMember(projectId, userId)
+	return member, err
 }

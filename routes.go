@@ -4,6 +4,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/vanntrong/asana-clone-be/auth"
+	"github.com/vanntrong/asana-clone-be/comments"
 	"github.com/vanntrong/asana-clone-be/db"
 	"github.com/vanntrong/asana-clone-be/middleware"
 	"github.com/vanntrong/asana-clone-be/project"
@@ -36,6 +37,7 @@ func InitRoutes(app *gin.Engine) {
 	projectRepository := project.NewProjectRepository(db.DB)
 	taskRepository := task.NewTaskRepository(db.DB)
 	sectionsRepository := sections.NewSectionsRepository(db.DB)
+	commentsRepository := comments.NewCommentsRepository(db.DB)
 
 	// init service and controller
 	authService := auth.NewAuthService(userRepository)
@@ -43,10 +45,12 @@ func InitRoutes(app *gin.Engine) {
 	projectService := project.NewProjectService(projectRepository, userService)
 	taskService := task.NewTaskService(taskRepository, projectService)
 	sectionsService := sections.NewSectionsService(sectionsRepository, projectService)
+	commentsService := comments.NewCommentsService(commentsRepository, taskService, projectService)
 
 	auth.NewAuthController(routes, authService)
 	user.NewUserController(routes, userService)
 	project.NewProjectController(routes, projectService)
 	task.NewTaskController(routes, taskService, projectService)
 	sections.NewSectionsController(routes, sectionsService)
+	comments.NewCommentsController(routes, commentsService)
 }

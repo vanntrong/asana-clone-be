@@ -12,7 +12,7 @@ func GenerateResponse(ctx *gin.Context, data interface{}, code int, pagination .
 		ctx.JSON(code, gin.H{
 			"message":    http.StatusText(code),
 			"data":       data,
-			"pagination": pagination,
+			"pagination": pagination[0],
 		})
 		return
 	}

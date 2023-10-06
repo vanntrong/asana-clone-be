@@ -15,6 +15,7 @@ type IProjectRepository interface {
 	AddMember(projectId string, members []string) error
 	RemoveMember(projectId string, members []string) error
 	FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, err error)
+	FindMember(projectId string, userId string) (*entities.ProjectUsers, error)
 }
 
 type ProjectRepository struct {
@@ -134,4 +135,19 @@ func (repo *ProjectRepository) FindMembers(projectId string, payload FindMembers
 	err = repo.db.Raw(stringQuery, projectId).Scan(members).Error
 
 	return
+}
+
+func (repo *ProjectRepository) FindMember(projectId string, userId string) (*entities.ProjectUsers, error) {
+	projectUser := &entities.ProjectUsers{}
+	result := repo.db.
+		Where("project_id = ?", projectId).
+		Where("user_id = ?", userId).
+		First(projectUser)
+	err := result.Error
+
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+
+	return projectUser, err
 }
