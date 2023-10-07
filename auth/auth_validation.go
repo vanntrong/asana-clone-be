@@ -14,3 +14,7 @@ type LoginValidation struct {
 type CheckEmailValidation struct {
 	Email string `form:"email" json:"email" validate:"required,email"`
 }
+
+type LoginGoogleValidation struct {
+	IdToken string `form:"id_token" json:"id_token" validate:"required"`
+}

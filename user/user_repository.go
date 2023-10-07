@@ -10,6 +10,7 @@ type IUserRepository interface {
 	FindByEmail(email string) (user *entities.User, err error)
 	FindById(id string) (user *entities.User, err error)
 	CreateUser(email string, password string, name string) (user *entities.User, err error)
+	CreateUserWithProvider(payload CreateUserValidation) (user *entities.User, err error)
 	GetList(query GetListUserQuery) ([]*entities.User, int64, error)
 }
 
@@ -46,6 +47,19 @@ func (repo *UserRepository) CreateUser(email string, password string, name strin
 	return user, err
 }
 
+func (repo *UserRepository) CreateUserWithProvider(payload CreateUserValidation) (user *entities.User, err error) {
+	user = &entities.User{
+		Email:    payload.Email,
+		Name:     payload.Name,
+		Avatar:   payload.Avatar,
+		Provider: payload.Provider,
+		IsActive: payload.IsActive,
+	}
+	err = repo.db.Create(&user).Error
+
+	return user, err
+}
+
 func (repo *UserRepository) FindById(id string) (user *entities.User, err error) {
 	user = &entities.User{}
 	result := repo.db.Where("id = ?", id).First(user)
@@ -66,7 +80,7 @@ func (repo *UserRepository) GetList(query GetListUserQuery) (users []*entities.U
 			repo.db.Model(&entities.User{}).Where("name ILIKE ?", "%"+query.Keyword+"%").
 				Or("email ILIKE ?", "%"+query.Keyword+"%"),
 		).
-		Where("is_deleted = ?", false)
+		Where("deleted_at is NULL")
 
 	if query.ExcludeInProject != "" {
 		queryBuilder = queryBuilder.Where("id not in (select pu.user_id from project_users pu where pu.project_id = ?)", query.ExcludeInProject)

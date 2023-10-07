@@ -1,2 +1,4 @@
 asana-clone-be.exe
 bin
+app.env
+app.production.env

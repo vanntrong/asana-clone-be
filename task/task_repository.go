@@ -136,7 +136,7 @@ func (repo *TaskRepository) GetListTask(query GetListTaskValidation, userId stri
 		Select("tasks.*, case when task_likes.task_id is not null then true else false end as is_liked, COALESCE(like_counts.like_count, 0) AS like_count").
 		Joins("left join task_likes on tasks.id = task_likes.task_id and task_likes.user_id = ?", userId).
 		Joins("left join (select task_id, count(*) AS like_count from task_likes group by task_id) as like_counts on tasks.id = like_counts.task_id").
-		Where("project_id = ?", query.ProjectId).Where("is_deleted = ?", false).
+		Where("project_id = ?", query.ProjectId).Where("deleted_at is null").
 		Where("section_id = ?", query.SectionId).
 		Order("tasks.order asc").
 		Limit(query.Limit).
@@ -159,7 +159,7 @@ func (repo *TaskRepository) UpdateOrderTasks(projectId string, sectionId string,
 	for index, taskId := range tasks {
 		err := repo.db.Model(&entities.Task{}).Where("id = ?", taskId).
 			Where("project_id = ?", projectId).
-			Where("is_deleted = ?", false).
+			Where("deleted_at is null").
 			Update("order", index+1).
 			Update("section_id", sectionId).
 			Error

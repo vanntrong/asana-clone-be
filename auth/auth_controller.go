@@ -16,6 +16,7 @@ func registerRoutes(router *gin.RouterGroup, ctrl *AuthController) {
 	v1 := router.Group("/auth")
 	v1.POST("/register", ctrl.RegisterUser)
 	v1.POST("/login", ctrl.LoginUser)
+	v1.POST("/login-google", ctrl.LoginGoogle)
 	v1.POST("/check-email", ctrl.CheckEmail)
 }
 
@@ -55,7 +56,25 @@ func (ctrl *AuthController) LoginUser(ctx *gin.Context) {
 	var _, token, err = ctrl.authService.Login(body)
 
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, errors.New("Invalid email or password"))
+		ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid email or password"))
+		return
+	}
+
+	utils.GenerateResponse(ctx, token, http.StatusOK)
+}
+
+func (ctrl *AuthController) LoginGoogle(ctx *gin.Context) {
+	var body LoginGoogleValidation
+	isValid := utils.Validation(ctx, &body)
+
+	if !isValid {
+		return
+	}
+
+	var _, token, err = ctrl.authService.LoginGoogle(body)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid email or password"))
 		return
 	}
 

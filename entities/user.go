@@ -11,8 +11,9 @@ type User struct {
 	BaseEntity
 	Name           string     `gorm:"not null;index" json:"name"`
 	Email          string     `gorm:"unique;not null;index" json:"email" `
-	Password       string     `gorm:"not null" json:"-"`
+	Password       string     `gorm:"" json:"-"`
 	Avatar         string     `gorm:"default:null" json:"avatar"`
+	Provider       string     `gorm:"default:local" json:"provider"`
 	ProjectCreated *[]Project `gorm:"foreignKey:CreatedById" json:"project_created,omitempty"`
 	TaskAssigned   *[]Task    `gorm:"foreignKey:AssigneeId" json:"task_assigned,omitempty"`
 	TaskCreated    *[]Task    `gorm:"foreignKey:CreatedById" json:"task_created,omitempty"`
@@ -26,7 +27,6 @@ type UserResponse struct {
 	Email     string     `json:"email" `
 	Avatar    string     `json:"avatar"`
 	IsActive  bool       `json:"is_active"`
-	IsDeleted bool       `json:"is_deleted"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `json:"deleted_at"`

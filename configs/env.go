@@ -9,6 +9,7 @@ type Config struct {
 	RefreshTokenSecret string `mapstructure:"REFRESH_TOKEN_SECRET"`
 	DBUrl              string `mapstructure:"DB_URL"`
 	PORT               string `mapstructure:"PORT"`
+	GoogleClientId     string `mapstructure:"GOOGLE_CLIENT_ID"`
 }
 
 var AppConfig Config
