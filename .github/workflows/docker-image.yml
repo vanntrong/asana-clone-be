@@ -8,6 +8,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Add Secrect to env
+        run: echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" | tee -a .app.production.env
+
       - name: Build the Docker image
         run: sudo docker build . --file Dockerfile --tag asana-be:$(date +%s)
 
