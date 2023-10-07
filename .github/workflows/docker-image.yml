@@ -4,24 +4,36 @@ on:
   push:
     branches: ["main"]
 
+env:
+  ECR_REGION: ap-southeast-1
+  DOCKER_BUILDKIT: 1
+  DOCKER_CONTAINER_NAME: asana-be
+  DOCKER_PORT: 80
+
 jobs:
-  build:
-    runs-on: self-hosted
+  build-and-push-image:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.ECR_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
       - name: Add Secrect to env
         run: echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" | tee -a .app.production.env
 
       - name: Build the Docker image
-        run: sudo docker build . --file Dockerfile --tag asana-be:lastest
-
-      - name: Stop old docker image
-        run: sudo docker stop asana-be || true && sudo docker rm asana-be || true
-
-      - name: Run new image
-        run: sudo docker run --name asana-be -d -p 8080:8080 --network asana-clone_db_network asana-be:lastest
-
-      - name: Remove image after run
-        run: sudo docker image prune -a -f
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: asana-be
+          IMAGE_TAG: ${{ github.sha }}
+        run: docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG . && docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
