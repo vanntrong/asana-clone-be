@@ -1,6 +1,8 @@
 name: Docker Image CI
 
-on: workflow_dispatch
+on:
+  push:
+    branches: ["main"]
 
 jobs:
   build:
@@ -13,13 +15,13 @@ jobs:
         run: echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" | tee -a .app.production.env
 
       - name: Build the Docker image
-        run: sudo docker build . --file Dockerfile --tag asana-be:$(date +%s)
+        run: sudo docker build . --file Dockerfile --tag asana-be:lastest
 
       - name: Stop old docker image
         run: sudo docker stop asana-be || true && sudo docker rm asana-be || true
 
       - name: Run new image
-        run: sudo docker run --name asana-be -d -p 8080:8080 --network asana-clone_db_network asana-be:$(date +%s)
+        run: sudo docker run --name asana-be -d -p 8080:8080 --network asana-clone_db_network asana-be:lastest
 
       - name: Remove image after run
         run: sudo docker image prune -a -f
