@@ -9,13 +9,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag asana-be:$(date +%s)
+        run: sudo docker build . --file Dockerfile --tag asana-be:$(date +%s)
 
       - name: Stop old docker image
-        run: docker stop asana-be || true && docker rm asana-be || true
+        run: sudo docker stop asana-be || true && sudo docker rm asana-be || true
 
       - name: Run new image
-        run: docker run --name asana-be -d -p 8080:8080 --network asana-clone_db_network asana-be:$(date +%s)
+        run: sudo docker run --name asana-be -d -p 8080:8080 --network asana-clone_db_network asana-be:$(date +%s)
 
       - name: Remove image after run
-        run: docker image prune -a -f
+        run: sudo docker image prune -a -f
