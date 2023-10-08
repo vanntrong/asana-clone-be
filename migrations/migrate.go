@@ -27,6 +27,7 @@ func SetupJoinTable() {
 }
 
 func MigrationTable() {
+	db.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
 	db.DB.AutoMigrate(&entities.User{})
 	db.DB.AutoMigrate(&entities.Project{})
 	db.DB.AutoMigrate(&entities.ProjectUsers{})

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/vanntrong/asana-clone-be/auth"
 	"github.com/vanntrong/asana-clone-be/comments"
+	"github.com/vanntrong/asana-clone-be/configs"
 	"github.com/vanntrong/asana-clone-be/db"
 	"github.com/vanntrong/asana-clone-be/middleware"
 	"github.com/vanntrong/asana-clone-be/project"
@@ -25,7 +26,7 @@ func InitRoutes(app *gin.Engine) {
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"}
 	config.ExposeHeaders = []string{"Content-Length"}
 	config.AllowOriginFunc = func(origin string) bool {
-		return origin == "http://localhost:3000"
+		return origin == configs.AppConfig.OriginHost
 	}
 
 	app.Use(cors.New(config))

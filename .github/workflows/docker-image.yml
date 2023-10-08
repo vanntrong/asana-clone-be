@@ -37,3 +37,40 @@ jobs:
           REPOSITORY: asana-be
           IMAGE_TAG: ${{ github.sha }}
         run: docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG . && docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+  pull-and-run-image:
+    needs: build-and-push-image
+    runs-on: self-hosted
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.ECR_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Pull Docker image from ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: asana-be
+          IMAGE_TAG: ${{ github.sha }}
+        run: docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - name: Stop and Remove Docker container
+        run: docker stop $DOCKER_CONTAINER_NAME || true && docker rm $DOCKER_CONTAINER_NAME || true
+
+      - name: Run Docker container
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: asana-be
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker run -d -p 8080:80 --network asana-clone_db_network  --name $DOCKER_CONTAINER_NAME $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - name: Remove Docker image
+        run: docker image prune -a -f

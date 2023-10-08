@@ -10,6 +10,7 @@ type Config struct {
 	DBUrl              string `mapstructure:"DB_URL"`
 	PORT               string `mapstructure:"PORT"`
 	GoogleClientId     string `mapstructure:"GOOGLE_CLIENT_ID"`
+	OriginHost         string `mapstructure:"ORIGIN_HOST"`
 }
 
 var AppConfig Config
