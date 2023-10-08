@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/vanntrong/asana-clone-be/auth"
@@ -20,13 +22,17 @@ func InitRoutes(app *gin.Engine) {
 			"message": "pong",
 		})
 	})
+	originList := strings.Split(configs.AppConfig.OriginHost, ",")
 	config := cors.DefaultConfig()
 	// config.AllowOrigins = []string{"http://localhost:3000"}
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization", "X-CSRF-Token", "Access-Control-Allow-Origin"}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"}
 	config.ExposeHeaders = []string{"Content-Length"}
 	config.AllowOriginFunc = func(origin string) bool {
-		return origin == configs.AppConfig.OriginHost
+		for _, v := range originList {
+			return v == origin
+		}
+		return false
 	}
 
 	app.Use(cors.New(config))
