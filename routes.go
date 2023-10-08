@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gin-contrib/cors"
@@ -24,7 +23,6 @@ func InitRoutes(app *gin.Engine) {
 		})
 	})
 	originList := strings.Split(configs.AppConfig.OriginHost, ",")
-	fmt.Println(originList)
 	config := cors.DefaultConfig()
 	// config.AllowOrigins = []string{"http://localhost:3000"}
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization", "X-CSRF-Token", "Access-Control-Allow-Origin"}
@@ -32,9 +30,9 @@ func InitRoutes(app *gin.Engine) {
 	config.ExposeHeaders = []string{"Content-Length"}
 	config.AllowOriginFunc = func(origin string) bool {
 		for _, v := range originList {
-			fmt.Println("v:", v)
-			fmt.Println("origin:", origin)
-			return v == origin
+			if v == origin {
+				return true
+			}
 		}
 		return false
 	}
