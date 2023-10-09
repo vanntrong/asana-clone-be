@@ -43,8 +43,12 @@ type PatchUpdateTaskValidation struct {
 
 type GetListTaskValidation struct {
 	common.Pagination
-	ProjectId string `form:"project_id" json:"project_id" validate:"required,uuid"`
-	SectionId string `form:"section_id" json:"section_id" validate:"required,uuid"`
+	ProjectId   string   `form:"project_id" json:"project_id" validate:"required,uuid"`
+	SectionId   string   `form:"section_id" json:"section_id" validate:"required,uuid"`
+	AssigneeIds []string `form:"assignee_ids[]" json:"assignee_ids" validate:"omitempty,dive,uuid"`
+	IsDone      bool     `form:"is_done" json:"is_done" validate:"omitempty,boolean"`
+	DueDate     string   `form:"due_date" json:"due_date" validate:"omitempty"`
+	StartDate   string   `form:"start_date" json:"start_date" validate:"omitempty"`
 }
 
 type CountTaskValidation struct {
