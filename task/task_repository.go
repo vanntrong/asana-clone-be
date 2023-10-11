@@ -147,7 +147,7 @@ func (repo *TaskRepository) GetListTask(query GetListTaskValidation, userId stri
 	if query.StartDate != "" {
 		startDate, err := utils.FormatTime(query.StartDate)
 		if err == nil {
-			queryBuilder.Where("start_date == ?", startDate)
+			queryBuilder.Where("start_date = ?", startDate)
 		}
 
 	}
