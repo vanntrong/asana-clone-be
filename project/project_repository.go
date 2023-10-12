@@ -3,6 +3,7 @@ package project
 import (
 	"github.com/google/uuid"
 	"github.com/vanntrong/asana-clone-be/entities"
+	"github.com/vanntrong/asana-clone-be/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -14,7 +15,7 @@ type IProjectRepository interface {
 	GetListMember(projectId string) (*[]entities.ProjectUsers, error)
 	AddMember(projectId string, members []string) error
 	RemoveMember(projectId string, members []string) error
-	FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, err error)
+	FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, total int64, err error)
 	FindMember(projectId string, userId string) (*entities.ProjectUsers, error)
 }
 
@@ -119,8 +120,13 @@ func (repo *ProjectRepository) GetMyProjects(userId string) (*[]entities.Project
 	return projects, err
 }
 
-func (repo *ProjectRepository) FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, err error) {
+func (repo *ProjectRepository) FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, total int64, err error) {
 	members = &[]entities.User{}
+	skip := utils.GetSkipValue(payload.Page, payload.Limit)
+
+	if err != nil {
+		return nil, 0, err
+	}
 
 	stringQuery := `
 	select u.id,u."name",u.email,u.avatar from users u 
@@ -128,11 +134,21 @@ func (repo *ProjectRepository) FindMembers(projectId string, payload FindMembers
 	where pu.project_id = ? and u.is_active = true and u.deleted_at is null
 	`
 
+	stringQueryCount := `
+	select count(u.id) as count from users u 
+	join project_users pu ON pu.user_id = u.id 
+	where pu.project_id = ? and u.is_active = true and u.deleted_at is null
+	`
+
 	if payload.Keyword != "" {
 		stringQuery += " and (u.name ilike '%" + payload.Keyword + "%' or u.email ilike '%" + payload.Keyword + "%')"
+		stringQueryCount += " and (u.name ilike '%" + payload.Keyword + "%' or u.email ilike '%" + payload.Keyword + "%')"
 	}
 
+	stringQuery += " limit " + utils.ConvertIntToString(payload.Limit) + " offset " + utils.ConvertIntToString(skip)
+
 	err = repo.db.Raw(stringQuery, projectId).Scan(members).Error
+	err = repo.db.Raw(stringQueryCount, projectId).Scan(&total).Error
 
 	return
 }

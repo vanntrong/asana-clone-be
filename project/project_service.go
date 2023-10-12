@@ -3,8 +3,10 @@ package project
 import (
 	"errors"
 
+	"github.com/vanntrong/asana-clone-be/common"
 	"github.com/vanntrong/asana-clone-be/entities"
 	"github.com/vanntrong/asana-clone-be/user"
+	"github.com/vanntrong/asana-clone-be/utils"
 )
 
 type IProjectService interface {
@@ -14,7 +16,7 @@ type IProjectService interface {
 	AddMember(projectId string, payload AddMemberValidation, requestId string) (err error)
 	RemoveMember(projectId string, payload RemoveMemberValidation, requestId string) (err error)
 	GetMyProjects(userId string) (*[]entities.Project, error)
-	FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, err error)
+	FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, pagination *common.PaginationResponse, err error)
 	FindMember(projectId string, userId string) (*entities.ProjectUsers, error)
 }
 
@@ -96,9 +98,16 @@ func (service *ProjectService) GetMyProjects(userId string) (*[]entities.Project
 	return projects, err
 }
 
-func (service *ProjectService) FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, err error) {
-	members, err = service.projectRepository.FindMembers(projectId, payload)
-	return members, err
+func (service *ProjectService) FindMembers(projectId string, payload FindMembersValidation) (members *[]entities.User, pagination *common.PaginationResponse, err error) {
+	members, total, err := service.projectRepository.FindMembers(projectId, payload)
+
+	if err != nil {
+		return
+	}
+
+	pagination = utils.GetPaginationResponse(total, &payload.Pagination)
+
+	return members, pagination, err
 }
 
 func (service *ProjectService) FindMember(projectId string, userId string) (*entities.ProjectUsers, error) {

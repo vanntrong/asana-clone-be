@@ -1,5 +1,7 @@
 package project
 
+import "github.com/vanntrong/asana-clone-be/common"
+
 type CreateProjectValidation struct {
 	Name     string   `form:"email" json:"name" validate:"required"`
 	Managers []string `form:"managers" json:"managers" validate:"required,dive,uuid"`
@@ -15,5 +17,5 @@ type RemoveMemberValidation struct {
 }
 
 type FindMembersValidation struct {
-	Keyword string `form:"keyword" json:"keyword" validate:"omitempty,required"`
+	common.Pagination
 }

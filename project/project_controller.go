@@ -138,14 +138,14 @@ func (ctrl *ProjectController) FindMembers(ctx *gin.Context) {
 		return
 	}
 
-	members, err := ctrl.projectService.FindMembers(projectId, query)
+	members, pagination, err := ctrl.projectService.FindMembers(projectId, query)
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	utils.GenerateResponse(ctx, members, http.StatusOK)
+	utils.GenerateResponse(ctx, members, http.StatusOK, pagination)
 }
 
 func (ctrl *ProjectController) isAddOrRemoveSelf(list []string, requestId string) bool {
