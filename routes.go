@@ -12,6 +12,7 @@ import (
 	"github.com/vanntrong/asana-clone-be/middleware"
 	"github.com/vanntrong/asana-clone-be/project"
 	"github.com/vanntrong/asana-clone-be/sections"
+	"github.com/vanntrong/asana-clone-be/tags"
 	"github.com/vanntrong/asana-clone-be/task"
 	"github.com/vanntrong/asana-clone-be/user"
 )
@@ -47,6 +48,7 @@ func InitRoutes(app *gin.Engine) {
 	taskRepository := task.NewTaskRepository(db.DB)
 	sectionsRepository := sections.NewSectionsRepository(db.DB)
 	commentsRepository := comments.NewCommentsRepository(db.DB)
+	tagsRepository := tags.NewTagsRepository(db.DB)
 
 	// init service and controller
 	authService := auth.NewAuthService(userRepository)
@@ -55,6 +57,7 @@ func InitRoutes(app *gin.Engine) {
 	taskService := task.NewTaskService(taskRepository, projectService)
 	sectionsService := sections.NewSectionsService(sectionsRepository, projectService)
 	commentsService := comments.NewCommentsService(commentsRepository, taskService, projectService)
+	tagsService := tags.NewTagsService(tagsRepository, projectService)
 
 	auth.NewAuthController(routes, authService)
 	user.NewUserController(routes, userService)
@@ -62,4 +65,5 @@ func InitRoutes(app *gin.Engine) {
 	task.NewTaskController(routes, taskService, projectService)
 	sections.NewSectionsController(routes, sectionsService)
 	comments.NewCommentsController(routes, commentsService)
+	tags.NewTagsController(routes, tagsService)
 }

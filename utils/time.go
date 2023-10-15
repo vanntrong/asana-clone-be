@@ -8,7 +8,7 @@ func FormatTime(t string) (time.Time, error) {
 	if t == "" {
 		return time.Time{}, nil
 	}
-	layout := "1/2/2006, 3:4:5 PM"
+	layout := "02/01/2006, 03:04:05 PM"
 	return time.Parse(layout, t)
 }
 

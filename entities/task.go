@@ -13,7 +13,6 @@ type Task struct {
 	StartDate    time.Time     `gorm:"not null;default:current_timestamp" json:"start_date"`
 	DueDate      time.Time     `gorm:"not null" json:"due_date"`
 	IsDone       bool          `gorm:"not null;default:false" json:"is_done"`
-	Tags         string        `gorm:"" json:"tags"`
 	Order        int64         `gorm:"index" json:"order"`
 	AssigneeId   uuid.UUID     `gorm:"type:uuid;not null" json:"assignee_id"`
 	ProjectId    uuid.UUID     `gorm:"type:uuid;not null" json:"project_id"`
@@ -29,10 +28,17 @@ type Task struct {
 	Section      *Section      `json:"section,omitempty"`
 	Comments     *[]Comment    `gorm:"foreignKey:TaskId" json:"comments,omitempty"`
 	Likes        *[]User       `gorm:"many2many:task_likes;" json:"users,omitempty"`
+	TagsList     *[]Tag        `gorm:"many2many:task_tags;" json:"tags_list,omitempty"`
 }
 
 type TaskLikes struct {
 	TaskId    uuid.UUID `gorm:"type:uuid;not null" json:"task_id"`
 	UserId    uuid.UUID `gorm:"type:uuid;not null" json:"user_id"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
+}
+
+type TaskTags struct {
+	TaskId    uuid.UUID `gorm:"type:uuid;not null" json:"task_id"`
+	TagId     uuid.UUID `gorm:"type:uuid;not null" json:"tag_id"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 }

@@ -24,6 +24,7 @@ func AutoMigrate() {
 func SetupJoinTable() {
 	db.DB.SetupJoinTable(&entities.Project{}, "Users", &entities.ProjectUsers{})
 	db.DB.SetupJoinTable(&entities.Task{}, "Likes", &entities.TaskLikes{})
+	db.DB.SetupJoinTable(&entities.Task{}, "TagsList", &entities.TaskTags{})
 }
 
 func MigrationTable() {
@@ -33,6 +34,7 @@ func MigrationTable() {
 	db.DB.AutoMigrate(&entities.ProjectUsers{})
 	db.DB.AutoMigrate(&entities.TaskLikes{})
 	db.DB.AutoMigrate(&entities.Task{})
+	db.DB.AutoMigrate(&entities.Tag{})
 	db.DB.AutoMigrate(&entities.Comment{})
 	db.DB.AutoMigrate(&entities.Section{})
 }
