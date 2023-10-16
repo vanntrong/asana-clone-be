@@ -74,7 +74,7 @@ func (repo *TaskRepository) Create(payload *CreateTaskValidation, authorId strin
 
 func (repo *TaskRepository) GetById(taskId string) (task *entities.Task, err error) {
 	task = &entities.Task{}
-	err = repo.db.Where("id = ?", taskId).Preload("Assignee").Preload("Project").Preload("CreatedBy").Preload("ParentTask").First(task).Error
+	err = repo.db.Where("id = ?", taskId).Preload("Assignee").Preload("Project").Preload("CreatedBy").Preload("ParentTask").Preload("TagsList").First(task).Error
 	return
 }
 
@@ -129,13 +129,15 @@ func (repo *TaskRepository) PatchUpdateTask(taskId string, payload *PatchUpdateT
 func (repo *TaskRepository) GetListTask(query GetListTaskValidation, userId string) (tasks []*entities.Task, total int64, err error) {
 	skip := utils.GetSkipValue(query.Page, query.Limit)
 
-	queryBuilder := repo.db.Model(&tasks).Preload("Assignee").Preload("CreatedBy").Preload("ParentTask").
+	queryBuilder := repo.db.Model(&tasks).Preload("Assignee").Preload("CreatedBy").Preload("TagsList").Preload("ParentTask").
 		Select("tasks.*, case when task_likes.task_id is not null then true else false end as is_liked, COALESCE(like_counts.like_count, 0) AS like_count").
 		Joins("left join task_likes on tasks.id = task_likes.task_id and task_likes.user_id = ?", userId).
 		Joins("left join (select task_id, count(*) AS like_count from task_likes group by task_id) as like_counts on tasks.id = like_counts.task_id").
+		Joins("left join task_tags on tasks.id = task_tags.task_id").
 		Where("project_id = ?", query.ProjectId).Where("deleted_at is null").
-		Where("section_id = ?", query.SectionId)
-
+		Where("section_id = ?", query.SectionId).
+		Group("tasks.id").
+		Group("task_likes.task_id").Group("like_counts.like_count")
 	repo.addQueryAssignee(queryBuilder, query.AssigneeIds)
 	if query.IsDone {
 		queryBuilder.Where("is_done = ?", query.IsDone)

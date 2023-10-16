@@ -54,10 +54,10 @@ func InitRoutes(app *gin.Engine) {
 	authService := auth.NewAuthService(userRepository)
 	userService := user.NewUserService(userRepository)
 	projectService := project.NewProjectService(projectRepository, userService)
-	taskService := task.NewTaskService(taskRepository, projectService)
+	tagsService := tags.NewTagsService(tagsRepository, projectService)
+	taskService := task.NewTaskService(taskRepository, projectService, tagsService)
 	sectionsService := sections.NewSectionsService(sectionsRepository, projectService)
 	commentsService := comments.NewCommentsService(commentsRepository, taskService, projectService)
-	tagsService := tags.NewTagsService(tagsRepository, projectService)
 
 	auth.NewAuthController(routes, authService)
 	user.NewUserController(routes, userService)

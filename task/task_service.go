@@ -9,6 +9,7 @@ import (
 	"github.com/vanntrong/asana-clone-be/common"
 	"github.com/vanntrong/asana-clone-be/entities"
 	"github.com/vanntrong/asana-clone-be/project"
+	"github.com/vanntrong/asana-clone-be/tags"
 	"github.com/vanntrong/asana-clone-be/utils"
 )
 
@@ -26,12 +27,13 @@ type ITaskService interface {
 type TaskService struct {
 	taskRepository ITaskRepository
 	projectService project.IProjectService
+	tagService     tags.ITagsService
 }
 
-func NewTaskService(taskRepository ITaskRepository, projectService project.IProjectService) *TaskService {
+func NewTaskService(taskRepository ITaskRepository, projectService project.IProjectService, tagService tags.ITagsService) *TaskService {
 	return &TaskService{
 		taskRepository,
-		projectService}
+		projectService, tagService}
 }
 
 func (service *TaskService) Create(payload *CreateTaskValidation, authorId string) (*entities.Task, error) {
@@ -83,6 +85,65 @@ func (service *TaskService) UpdateTask(taskId string, payload *UpdateTaskValidat
 
 	if err != nil {
 		return nil, err
+	}
+
+	currentTagIdsDict := make(map[string]bool)
+	newTagIdsDict := make(map[string]bool)
+
+	listAddTagIds := make([]string, 0)
+	listRemoveTagIds := make([]string, 0)
+
+	for _, tag := range *taskFound.TagsList {
+		currentTagIdsDict[tag.ID.String()] = true
+	}
+
+	for _, tagId := range payload.Tags {
+		newTagIdsDict[tagId] = true
+	}
+
+	for _, tag := range *taskFound.TagsList {
+		if _, ok := newTagIdsDict[tag.ID.String()]; !ok {
+			listRemoveTagIds = append(listRemoveTagIds, tag.ID.String())
+			continue
+		}
+		if _, ok := currentTagIdsDict[tag.ID.String()]; !ok {
+			listAddTagIds = append(listAddTagIds, tag.ID.String())
+		}
+	}
+
+	for _, tagId := range payload.Tags {
+		if _, ok := newTagIdsDict[tagId]; !ok {
+			listRemoveTagIds = append(listRemoveTagIds, tagId)
+			continue
+		}
+		if _, ok := currentTagIdsDict[tagId]; !ok {
+			listAddTagIds = append(listAddTagIds, tagId)
+		}
+	}
+
+	for _, tagId := range listAddTagIds {
+		payload := &tags.AddTagToTaskValidation{
+			TagId:  tagId,
+			TaskId: taskId,
+		}
+		_, err = service.tagService.AddTagToTask(userId, *payload)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	for _, tagId := range listRemoveTagIds {
+		payload := &tags.RemoveTagFromTaskValidation{
+			TagId:  tagId,
+			TaskId: taskId,
+		}
+
+		err = service.tagService.RemoveTagFromTask(userId, *payload)
+
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	task, err := service.taskRepository.UpdateTask(taskFound.ID.String(), payload)

@@ -12,6 +12,7 @@ type ITagsService interface {
 	CreateTag(userId string, payload CreateTagValidation) (tag *entities.Tag, err error)
 	UpdateTag(tagId string, userId string, payload UpdateTagValidation) (tag *entities.Tag, err error)
 	AddTagToTask(userId string, payload AddTagToTaskValidation) (taskTag *entities.TaskTags, err error)
+	RemoveTagFromTask(userId string, payload RemoveTagFromTaskValidation) (err error)
 }
 
 type TagsService struct {
@@ -79,4 +80,22 @@ func (s *TagsService) AddTagToTask(userId string, payload AddTagToTaskValidation
 	}
 
 	return s.repo.AddTagToTask(payload)
+}
+
+func (s *TagsService) RemoveTagFromTask(userId string, payload RemoveTagFromTaskValidation) (err error) {
+	// check if tag exist
+	tag, err := s.repo.FindTag(payload.TagId)
+
+	if err != nil || tag == nil {
+		return fmt.Errorf("tag not found")
+	}
+
+	// Check if project exist and user is member of project
+	projectUser, err := s.projectService.FindMember(tag.ProjectId.String(), userId)
+
+	if err != nil || projectUser == nil {
+		return fmt.Errorf("project not found, or user is not member of project")
+	}
+
+	return s.repo.RemoveTagFromTask(payload)
 }
