@@ -18,7 +18,7 @@ type User struct {
 	TaskAssigned   *[]Task    `gorm:"foreignKey:AssigneeId" json:"task_assigned,omitempty"`
 	TaskCreated    *[]Task    `gorm:"foreignKey:CreatedById" json:"task_created,omitempty"`
 	CommentCreated *[]Comment `gorm:"foreignKey:AuthorId" json:"comment_created,omitempty"`
-	IsActive       bool       `gorm:"default:false" json:"is_active"`
+	IsActive       bool       `gorm:"default:true" json:"is_active"`
 }
 
 type UserResponse struct {
