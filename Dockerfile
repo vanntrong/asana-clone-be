@@ -7,5 +7,5 @@ FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /app/main .
 COPY --from=builder /app/app.production.env /app/app.env
-EXPOSE 80
+EXPOSE 8080
 CMD ["./main"]
