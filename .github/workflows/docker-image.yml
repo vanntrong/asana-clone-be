@@ -1,7 +1,8 @@
 name: Docker Image CI
 
 on:
-  workflow_dispatch
+  push:
+    branches: [main]
 
 env:
   ECR_REGION: ap-southeast-1
