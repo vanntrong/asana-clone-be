@@ -25,7 +25,7 @@ pipeline {
                  echo 'Empty'
             }
         }
-        stage('Deploy') {
+        stage('Push image to ECR') {
             steps {
                 script{
                     docker.withRegistry('https://475211048958.dkr.ecr.ap-southeast-1.amazonaws.com/asana-be', 'ecr:ap-southeast-1:aws-credentials') {
@@ -34,6 +34,12 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+    post {
+        // Clean after build
+        always {
+            cleanWs()
         }
     }
 }

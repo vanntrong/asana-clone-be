@@ -1,0 +1,22 @@
+pipeline {
+    agent {
+        cloud "Asana Backend"
+    }
+    options {
+        skipStagesAfterUnstable()
+    }
+    environment {
+        GOOGLE_CLIENT_ID = credentials('google_client_id')
+    }
+    stages {
+        stage("Test connect") {
+            sh 'echo "abc"'
+        }
+    }
+    post {
+        // Clean after build
+        always {
+            cleanWs()
+        }
+    }
+}
