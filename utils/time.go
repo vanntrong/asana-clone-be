@@ -12,6 +12,6 @@ func FormatTime(t string) (time.Time, error) {
 	return time.Parse(layout, t)
 }
 
-func GetTimeNow() time.Time {
-	return time.Now().UTC()
+func GetTimeNow() string {
+	return time.Now().Format("02/01/2006, 03:04:05 PM -07:00")
 }

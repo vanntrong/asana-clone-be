@@ -18,3 +18,7 @@ type CheckEmailValidation struct {
 type LoginGoogleValidation struct {
 	IdToken string `form:"id_token" json:"id_token" validate:"required"`
 }
+
+type RefreshTokenValidation struct {
+	RefreshToken string `form:"refresh_token" json:"refresh_token" validate:"required"`
+}

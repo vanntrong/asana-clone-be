@@ -189,7 +189,20 @@ func (service *TaskService) DeleteTask(taskId string, userId string) error {
 	if err != nil || task == nil {
 		return errors.New("task not found")
 	}
-	return nil
+
+	projectMember, err := service.projectService.GetListMember(task.Project.ID.String())
+
+	if err != nil || len(*projectMember) == 0 {
+		return errors.New("project not found")
+	}
+
+	if !project.IsMember(projectMember, userId) {
+		return errors.New("you are not member of this project")
+	}
+
+	err = service.taskRepository.DeleteTask(taskId)
+
+	return err
 }
 
 func (service *TaskService) isParentTaskValid(parentTaskId uuid.NullUUID, projectId string) error {

@@ -73,5 +73,5 @@ func (repo *CommentsRepository) GetById(commentId string) (*entities.Comment, er
 
 func (repo *CommentsRepository) Delete(commentId string) error {
 	deletedAt := utils.GetTimeNow()
-	return repo.db.Model(&entities.Comment{}).Update("deleted_at", deletedAt.String()).Error
+	return repo.db.Model(&entities.Comment{}).Update("deleted_at", deletedAt).Error
 }

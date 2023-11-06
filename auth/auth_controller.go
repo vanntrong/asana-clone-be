@@ -18,6 +18,7 @@ func registerRoutes(router *gin.RouterGroup, ctrl *AuthController) {
 	v1.POST("/login", ctrl.LoginUser)
 	v1.POST("/login-google", ctrl.LoginGoogle)
 	v1.POST("/check-email", ctrl.CheckEmail)
+	v1.POST("/refresh-token", ctrl.RefreshToken)
 }
 
 func NewAuthController(app *gin.RouterGroup, authService IAuthService) {
@@ -101,4 +102,23 @@ func (ctrl *AuthController) CheckEmail(ctx *gin.Context) {
 		"email":  info.Email,
 		"avatar": info.Avatar,
 	}, http.StatusOK)
+}
+
+func (ctrl *AuthController) RefreshToken(ctx *gin.Context) {
+	var body RefreshTokenValidation
+
+	isValid := utils.Validation(ctx, &body)
+
+	if !isValid {
+		return
+	}
+
+	tokens, err := ctrl.authService.RefreshToken(body)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid refresh token"))
+		return
+	}
+
+	utils.GenerateResponse(ctx, tokens, http.StatusOK)
 }

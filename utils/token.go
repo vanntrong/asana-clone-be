@@ -24,7 +24,7 @@ func GenToken(payload map[string]string) (token *Token) {
 		"name":  payload["name"],
 		"id":    payload["id"],
 		"iat":   time.Now().Unix(),
-		"exp":   time.Now().Add(time.Minute * 500).Unix(),
+		"exp":   time.Now().Add(time.Minute * 5).Unix(),
 	})
 	refresh_token = *jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss":   "asana-clone",
@@ -53,6 +53,21 @@ func ValidateToken(token_str string) (map[string]any, error) {
 			return nil, fmt.Errorf("Unexpected signing method %v", t_.Header["alg"])
 		}
 		return []byte(configs.AppConfig.AccessTokenSecret), nil
+	})
+
+	if !token.Valid || err != nil {
+		return nil, err
+	}
+
+	return token.Claims.(jwt.MapClaims), nil
+}
+
+func ValidateRefreshToken(token_str string) (map[string]any, error) {
+	token, err := jwt.Parse(token_str, func(t_ *jwt.Token) (interface{}, error) {
+		if _, ok := t_.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method %v", t_.Header["alg"])
+		}
+		return []byte(configs.AppConfig.RefreshTokenSecret), nil
 	})
 
 	if !token.Valid || err != nil {

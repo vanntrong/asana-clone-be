@@ -18,6 +18,7 @@ type IAuthService interface {
 	Login(payload LoginValidation) (*entities.User, *utils.Token, error)
 	LoginGoogle(payload LoginGoogleValidation) (*entities.User, *utils.Token, error)
 	CheckEmail(payload CheckEmailValidation) (*entities.User, error)
+	RefreshToken(payload RefreshTokenValidation) (*utils.Token, error)
 }
 
 type AuthService struct {
@@ -137,4 +138,32 @@ func (service *AuthService) CheckEmail(payload CheckEmailValidation) (*entities.
 	}
 
 	return exitsUser, nil
+}
+
+func (service *AuthService) RefreshToken(payload RefreshTokenValidation) (*utils.Token, error) {
+	refreshToken, err := utils.ValidateRefreshToken(payload.RefreshToken)
+
+	if refreshToken == nil || err != nil {
+		return nil, errors.New("invalid refresh token")
+	}
+
+	if refreshToken["sub"] != "refresh_token" {
+		return nil, errors.New("invalid refresh token")
+	}
+
+	userId := refreshToken["id"].(string)
+
+	user, err := service.userRepository.FindById(userId)
+
+	if err != nil || user == nil {
+		return nil, errors.New("invalid refresh token")
+	}
+
+	token := utils.GenToken(map[string]string{
+		"email": user.Email,
+		"name":  user.Name,
+		"id":    user.ID.String(),
+	})
+
+	return token, nil
 }

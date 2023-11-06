@@ -20,6 +20,7 @@ type ITaskRepository interface {
 	CheckLikeExist(taskId string, userId string) (isExist bool, err error)
 	LikeTask(taskId string, userId string) (err error)
 	UnLikeTask(taskId string, userId string) (err error)
+	DeleteTask(taskId string) (err error)
 }
 
 type TaskRepository struct {
@@ -218,6 +219,12 @@ func (repo *TaskRepository) UnLikeTask(taskId string, userId string) (err error)
 	like := &entities.TaskLikes{}
 
 	err = repo.db.Where("task_id = ?", taskId).Where("user_id = ?", userId).Delete(like).Error
+
+	return
+}
+
+func (repo *TaskRepository) DeleteTask(taskId string) (err error) {
+	err = repo.db.Model(&entities.Task{}).Where("id = ?", taskId).Update("deleted_at", utils.GetTimeNow()).Error
 
 	return
 }
