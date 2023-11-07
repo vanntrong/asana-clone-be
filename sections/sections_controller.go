@@ -19,6 +19,7 @@ func registerRoutes(router *gin.RouterGroup, ctrl *SectionsController) {
 	v1.GET("/:id", middleware.AuthMiddleware, ctrl.GetById)
 	v1.POST("/", middleware.AuthMiddleware, ctrl.CreateSection)
 	v1.PUT("/:id", middleware.AuthMiddleware, ctrl.UpdateSection)
+	v1.DELETE("/:id", middleware.AuthMiddleware, ctrl.Delete)
 }
 
 func NewSectionsController(app *gin.RouterGroup, sectionsService ISectionsService) {
@@ -106,4 +107,19 @@ func (ctrl *SectionsController) GetById(c *gin.Context) {
 	}
 
 	utils.GenerateResponse(c, section, http.StatusOK)
+}
+
+func (ctrl *SectionsController) Delete(c *gin.Context) {
+	userId := c.Request.Header.Get(configs.HeaderUserId)
+
+	sectionId := c.Param("id")
+
+	err := ctrl.SectionsService.Delete(userId, sectionId)
+
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	utils.GenerateResponse(c, map[string]interface{}{}, http.StatusNoContent)
 }

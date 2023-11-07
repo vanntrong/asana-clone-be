@@ -3,6 +3,7 @@ package sections
 import (
 	"github.com/google/uuid"
 	"github.com/vanntrong/asana-clone-be/entities"
+	"github.com/vanntrong/asana-clone-be/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -12,6 +13,7 @@ type ISectionsRepository interface {
 	GetById(sectionId string) (*entities.Section, error)
 	CreateSection(body CreateSectionValidation) (*entities.Section, error)
 	UpdateSection(sectionId string, body UpdateSectionValidation) (*entities.Section, error)
+	Delete(sectionId string) error
 }
 
 type SectionsRepository struct {
@@ -23,7 +25,7 @@ func NewSectionsRepository(db *gorm.DB) *SectionsRepository {
 }
 
 func (repo *SectionsRepository) GetList(projectId string) (sections []*entities.Section, err error) {
-	err = repo.db.Where("project_id = ?", projectId).Find(&sections).Error
+	err = repo.db.Where("project_id = ?", projectId).Where("deleted_at is null").Find(&sections).Error
 
 	return
 }
@@ -52,7 +54,13 @@ func (repo *SectionsRepository) UpdateSection(sectionId string, body UpdateSecti
 }
 
 func (repo *SectionsRepository) GetById(sectionId string) (section *entities.Section, err error) {
-	err = repo.db.Where("id = ?", sectionId).First(&section).Preload("Project").Error
+	err = repo.db.Where("id = ?", sectionId).Where("deleted_at is null").First(&section).Preload("Project").Error
 
 	return
+}
+
+func (repo *SectionsRepository) Delete(sectionId string) error {
+	err := repo.db.Model(&entities.Section{}).Where("id = ?", sectionId).Update("deleted_at", utils.GetTimeNow()).Error
+
+	return err
 }

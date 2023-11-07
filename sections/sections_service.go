@@ -12,6 +12,7 @@ type ISectionsService interface {
 	GetById(userId string, sectionId string) (*entities.Section, error)
 	CreateSection(userId string, body CreateSectionValidation) (*entities.Section, error)
 	UpdateSection(userId string, sectionId string, body UpdateSectionValidation) (*entities.Section, error)
+	Delete(userId string, sectionId string) error
 }
 
 type SectionsService struct {
@@ -88,4 +89,24 @@ func (service *SectionsService) GetById(userId string, sectionId string) (sectio
 	}
 
 	return
+}
+
+func (service *SectionsService) Delete(userId string, sectionId string) error {
+	section, err := service.sectionRepository.GetById(sectionId)
+
+	if err != nil {
+		return fmt.Errorf("section not found")
+	}
+
+	projectMembers, err := service.projectService.GetListMember(section.ProjectId.String())
+
+	isMember := project.IsMember(projectMembers, userId)
+
+	if err != nil || !isMember {
+		return fmt.Errorf("you are not member of this project")
+	}
+
+	err = service.sectionRepository.Delete(sectionId)
+
+	return err
 }
