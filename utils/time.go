@@ -13,5 +13,5 @@ func FormatTime(t string) (time.Time, error) {
 }
 
 func GetTimeNow() string {
-	return time.Now().Format("02/01/2006, 03:04:05 PM -07:00")
+	return time.Now().Format("2006-01-02 03:04:05 PM -07:00")
 }
